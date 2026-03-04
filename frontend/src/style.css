@@ -1,0 +1,82 @@
+/* ===== NAVBAR โปร่ง ===== */
+.navbar {
+  width: 100%;
+  height: 70px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 60px;
+
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* โลโก้ */
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+}
+
+/* เมนูกลาง (แก้จาก .menu เป็น .center) */
+.center {
+  display: flex;
+  gap: 40px;
+}
+
+.center a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.center a:hover {
+  color: #ff3c3c;
+}
+
+/* ด้านขวา */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Login */
+.login-btn {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.login-btn:hover {
+  background: white;
+  color: black;
+}
+
+/* Register */
+.register-btn {
+  background: #ffc107;
+  border: none;
+  color: black;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.register-btn:hover {
+  opacity: 0.9;
+}

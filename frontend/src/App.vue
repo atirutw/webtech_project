@@ -1,47 +1,29 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+  <div
+    id="app"
+    :style="{
+      background: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url(${bg})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+      minHeight: '100vh',
+      paddingTop: '70px'
+    }"
+  >
+    <Navbar />
+    <router-view />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
+<script setup>
+import Navbar from './components/Navbar.vue'
+import bg from './assets/music.jpg'
+</script>
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
 }
 </style>

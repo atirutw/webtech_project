@@ -1,19 +1,31 @@
 import { RequestHandler } from 'express'
 import { z } from 'zod'
 
-import { getMe, login, logout, registerFirstAdmin } from '../services/auth.service'
+import { getMe, login, logout, register, updateMe } from '../services/auth.service'
 import { HttpError } from '../utils/http-error'
 
 const registerSchema = z.object({
     name: z.string().trim().min(2),
     email: z.string().email(),
     password: z.string().min(8),
+    adminKey: z.string().trim().min(1).optional(),
 })
 
 const loginSchema = z.object({
     email: z.string().email(),
     password: z.string().min(1),
 })
+
+const updateMeSchema = z
+    .object({
+        name: z.string().trim().min(2).optional(),
+        email: z.string().email().optional(),
+        currentPassword: z.string().min(1).optional(),
+        newPassword: z.string().min(8).optional(),
+    })
+    .refine((payload) => Object.keys(payload).length > 0, {
+        message: 'At least one field is required',
+    })
 
 const getBearerToken = (authorizationHeader?: string): string => {
     if (!authorizationHeader?.startsWith('Bearer ')) {
@@ -29,10 +41,10 @@ const getBearerToken = (authorizationHeader?: string): string => {
     return token
 }
 
-export const registerFirstAdminController: RequestHandler = async (req, res, next) => {
+export const registerController: RequestHandler = async (req, res, next) => {
     try {
         const payload = registerSchema.parse(req.body)
-        const response = await registerFirstAdmin(payload)
+        const response = await register(payload)
 
         res.status(201).json(response)
     } catch (error) {
@@ -68,6 +80,18 @@ export const logoutController: RequestHandler = async (req, res, next) => {
         await logout(token)
 
         res.status(204).send()
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const updateMeController: RequestHandler = async (req, res, next) => {
+    try {
+        const token = getBearerToken(req.header('authorization'))
+        const payload = updateMeSchema.parse(req.body)
+        const response = await updateMe(token, payload)
+
+        res.status(200).json({ user: response })
     } catch (error) {
         next(error)
     }

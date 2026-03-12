@@ -25,12 +25,6 @@ const toPublicUser = (row: UserRow): PublicUser => ({
     createdAt: row.created_at.toISOString(),
 })
 
-export const countUsers = async (): Promise<number> => {
-    const result = await pool.query<{ count: string }>('SELECT COUNT(*)::text AS count FROM users')
-
-    return Number(result.rows[0]?.count ?? 0)
-}
-
 export const createUser = async (params: {
     name: string
     email: string
@@ -69,6 +63,40 @@ export const findUserWithPasswordByEmail = async (email: string): Promise<UserRo
     return result.rows[0] ?? null
 }
 
+export const findUserWithPasswordById = async (id: number): Promise<UserRow | null> => {
+    const result = await pool.query<UserRow>(
+        `
+        SELECT id, name, email, password_hash, role, created_at
+        FROM users
+        WHERE id = $1
+        LIMIT 1
+        `,
+        [id],
+    )
+
+    return result.rows[0] ?? null
+}
+
+export const findPublicUserByEmail = async (email: string): Promise<PublicUser | null> => {
+    const result = await pool.query<UserRow>(
+        `
+        SELECT id, name, email, password_hash, role, created_at
+        FROM users
+        WHERE email = $1
+        LIMIT 1
+        `,
+        [email],
+    )
+
+    const user = result.rows[0]
+
+    if (!user) {
+        return null
+    }
+
+    return toPublicUser(user)
+}
+
 export const findPublicUserByTokenHash = async (tokenHash: string): Promise<PublicUser | null> => {
     const result = await pool.query<UserRow>(
         `
@@ -80,6 +108,58 @@ export const findPublicUserByTokenHash = async (tokenHash: string): Promise<Publ
         LIMIT 1
         `,
         [tokenHash],
+    )
+
+    const user = result.rows[0]
+
+    if (!user) {
+        return null
+    }
+
+    return toPublicUser(user)
+}
+
+export const updateUser = async (
+    id: number,
+    params: {
+        name?: string | undefined
+        email?: string | undefined
+        passwordHash?: string | undefined
+    },
+): Promise<PublicUser | null> => {
+    const updates: string[] = []
+    const values: Array<string | number> = []
+
+    if (params.name !== undefined) {
+        values.push(params.name)
+        updates.push(`name = $${values.length}`)
+    }
+
+    if (params.email !== undefined) {
+        values.push(params.email)
+        updates.push(`email = $${values.length}`)
+    }
+
+    if (params.passwordHash !== undefined) {
+        values.push(params.passwordHash)
+        updates.push(`password_hash = $${values.length}`)
+    }
+
+    if (updates.length === 0) {
+        const existing = await findUserWithPasswordById(id)
+        return existing ? toPublicUser(existing) : null
+    }
+
+    values.push(id)
+
+    const result = await pool.query<UserRow>(
+        `
+        UPDATE users
+        SET ${updates.join(', ')}
+        WHERE id = $${values.length}
+        RETURNING id, name, email, password_hash, role, created_at
+        `,
+        values,
     )
 
     const user = result.rows[0]

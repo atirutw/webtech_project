@@ -10,6 +10,7 @@ const envSchema = z.object({
     DATABASE_URL: z
         .string()
         .default('postgresql://api:api@localhost:5432/musicstore'),
+    ADMIN_REGISTRATION_KEY: z.string().default(''),
 })
 
 export const env = envSchema.parse(process.env)

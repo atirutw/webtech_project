@@ -23,6 +23,11 @@
           <label>Password</label>
         </div>
 
+        <div class="input-group">
+          <input v-model="adminKey" type="password" />
+          <label>Admin Key (optional)</label>
+        </div>
+
         <button type="submit" :disabled="isSubmitting">
           {{ isSubmitting ? 'Registering...' : 'Register' }}
         </button>
@@ -47,6 +52,7 @@ import { useAuthStore } from "../stores/auth"
 const name = ref("")
 const email = ref("")
 const password = ref("")
+const adminKey = ref("")
 const errorMessage = ref("")
 const isSubmitting = ref(false)
 const router = useRouter()
@@ -57,10 +63,11 @@ const handleRegister = async () => {
   isSubmitting.value = true
 
   try {
-    await authStore.registerFirstAdmin({
+    await authStore.register({
       name: name.value,
       email: email.value,
-      password: password.value
+      password: password.value,
+      adminKey: adminKey.value || undefined
     })
 
     router.push("/")

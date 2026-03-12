@@ -66,9 +66,20 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async registerFirstAdmin(payload) {
-            const response = await api.post('/auth/register-first-admin', payload)
+        async register(payload) {
+            const response = await api.post('/auth/register', payload)
             this.setSession(response.data)
+            return response.data
+        },
+
+        async updateMe(payload) {
+            const response = await api.patch('/auth/me', payload, {
+                headers: this.authHeaders()
+            })
+
+            this.user = response.data.user
+            localStorage.setItem(USER_KEY, JSON.stringify(this.user))
+
             return response.data
         },
 

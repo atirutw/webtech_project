@@ -26,7 +26,7 @@
     <!-- ด้านขวา -->
     <div class="right">
       <template v-if="auth.isAuthenticated">
-        <span class="user-pill">{{ auth.user?.name }}</span>
+        <router-link to="/profile" class="user-pill">{{ auth.user?.name }}</router-link>
         <button class="login-btn" @click="handleLogout">Logout</button>
       </template>
       <template v-else>

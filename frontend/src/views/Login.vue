@@ -1,33 +1,49 @@
 <template>
   <div class="login-page">
-    <!-- ดาว -->
-    <div class="stars"></div>
+    <div class="bg-overlay"></div>
 
-    <div class="login-card">
-      <h1>Welcome Back</h1>
-      <p class="subtitle">Login to your Music World 🎵</p>
+    <div class="login-card card border-0 shadow-lg p-4 p-md-5">
+      <h1 class="text-warning mb-2">Welcome Back</h1>
+      <p class="subtitle text-light-emphasis mb-4">Login to your Music World 🎵</p>
 
-      <form @submit.prevent="handleLogin">
-        <div class="input-group">
-          <input v-model="email" type="email" required />
-          <label>Email</label>
+      <form @submit.prevent="handleLogin" class="d-grid gap-3">
+        <div class="form-floating">
+          <input
+            v-model="email"
+            type="email"
+            class="form-control form-control-lg bg-dark-subtle border-secondary"
+            id="email"
+            placeholder="Email"
+            required
+          />
+          <label for="email">Email</label>
         </div>
 
-        <div class="input-group">
-          <input v-model="password" type="password" required />
-          <label>Password</label>
+        <div class="form-floating">
+          <input
+            v-model="password"
+            type="password"
+            class="form-control form-control-lg bg-dark-subtle border-secondary"
+            id="password"
+            placeholder="Password"
+            required
+          />
+          <label for="password">Password</label>
         </div>
 
-        <button type="submit" :disabled="isSubmitting">
+        <button type="submit" class="btn btn-warning btn-lg fw-semibold" :disabled="isSubmitting">
+          <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
           {{ isSubmitting ? 'Logging in...' : 'Login' }}
         </button>
       </form>
 
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+      <div v-if="errorMessage" class="alert alert-danger mt-3 mb-0 py-2" role="alert">
+        {{ errorMessage }}
+      </div>
 
-      <p class="register-link">
+      <p class="register-link mt-4 mb-0 text-light">
         ยังไม่มีบัญชี?
-        <router-link to="/register">สมัครสมาชิก</router-link>
+        <router-link to="/register" class="text-warning">สมัครสมาชิก</router-link>
       </p>
     </div>
   </div>
@@ -71,143 +87,43 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-page {
-   position: relative;
+  position: relative;
   min-height: 100vh;
-  background: url('@/assets/music.jpg') no-repeat center center;
+  background: url('/src/assets/music.jpg') no-repeat center center;
   background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 100px 16px 40px;
 }
 
-/* ดาว */
-.stars {
+.bg-overlay {
   position: absolute;
-  width: 200%;
-  height: 200%;
-  background: transparent;
-  box-shadow:
-    100px 200px #fff,
-    300px 400px #fff,
-    600px 100px #fff,
-    800px 500px #fff,
-    1200px 300px #fff,
-    1500px 600px #fff,
-    1800px 200px #fff;
-  animation: twinkle 4s infinite alternate;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
 }
 
-@keyframes twinkle {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
-}
-
-/* กล่อง */
 .login-card {
   position: relative;
-  width: 400px;
-  padding: 45px;
-  border-radius: 25px;
-  background: rgba(10, 10, 40, 0.9);
+  width: 440px;
+  max-width: 100%;
+  border-radius: 20px;
+  background: rgba(10, 10, 40, 0.88);
   backdrop-filter: blur(15px);
-  box-shadow:
-    0 0 25px gold,
-    0 0 60px rgba(255, 200, 0, 0.6);
-  color: white;
-  text-align: center;
-  animation: float 4s ease-in-out infinite;
   z-index: 2;
 }
 
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
 .login-card h1 {
-  margin-bottom: 10px;
   font-size: 30px;
-  color: gold;
-  text-shadow: 0 0 15px gold;
+  text-align: center;
 }
 
 .subtitle {
   font-size: 14px;
-  margin-bottom: 30px;
-  opacity: 0.8;
-}
-
-/* Input */
-.input-group {
-  position: relative;
-  margin-bottom: 25px;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-bottom: 2px solid #aaa;
-  background: transparent;
-  color: white;
-  font-size: 14px;
-  outline: none;
-}
-
-.input-group label {
-  position: absolute;
-  left: 0;
-  top: 12px;
-  font-size: 14px;
-  color: #ccc;
-  pointer-events: none;
-  transition: 0.3s;
-}
-
-.input-group input:focus + label,
-.input-group input:valid + label {
-  top: -10px;
-  font-size: 12px;
-  color: gold;
-}
-
-/* ปุ่ม */
-button {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 40px;
-  background: linear-gradient(45deg, gold, orange);
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 25px gold;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.error {
-  margin-top: 12px;
-  color: #ff6b6b;
-  font-size: 13px;
+  text-align: center;
 }
 
 .register-link {
-  margin-top: 20px;
-  font-size: 13px;
-}
-
-.register-link a {
-  color: gold;
-  text-decoration: none;
+  text-align: center;
 }
 </style>

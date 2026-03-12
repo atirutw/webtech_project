@@ -7,7 +7,9 @@ const envSchema = z.object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     HOST: z.string().default('0.0.0.0'),
     PORT: z.coerce.number().int().positive().default(4000),
-    DATABASE_URL: z.string().optional(),
+    DATABASE_URL: z
+        .string()
+        .default('postgresql://api:api@localhost:5432/musicstore'),
 })
 
 export const env = envSchema.parse(process.env)

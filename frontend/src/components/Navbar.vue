@@ -10,30 +10,9 @@
     <div class="center">
       <router-link to="/" class="nav-link">หน้าแรก</router-link>
 
-      <!-- Dropdown สินค้า -->
-      <div class="dropdown">
-        <span class="nav-link dropbtn">สินค้า ▾</span>
-
-        <div class="dropdown-menu">
-          <router-link 
-            to="/products?category=instrument" 
-            class="dropdown-item">
-            🎸 เครื่องดนตรี
-          </router-link>
-
-          <router-link 
-            to="/accessory" 
-            class="dropdown-item">
-            🎧 อุปกรณ์เสริม
-          </router-link>
-
-          <router-link 
-            to="/products" 
-            class="dropdown-item">
-            📦 ทั้งหมด
-          </router-link>
-        </div>
-      </div>
+      <router-link to="/products" class="nav-link">
+        📦 สินค้า
+      </router-link>
 
       <!-- ตะกร้า + Badge -->
       <router-link to="/cart" class="nav-link cart-link">
@@ -181,52 +160,6 @@ const handleLogout = async () => {
   padding: 2px 6px;
   border-radius: 50px;
   font-weight: bold;
-}
-
-/* ===== Dropdown ===== */
-.dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 55px;
-  left: 0;
-
-  min-width: 230px;
-  padding: 10px 0;
-
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 16px;
-
-  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(15px);
-  transition: all 0.25s ease;
-}
-
-.dropdown:hover .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.dropdown-item {
-  display: block;
-  padding: 12px 20px;
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.dropdown-item:hover {
-  background: #f3f4f6;
-  color: #ff9800;
 }
 
 /* ===== Right Buttons ===== */

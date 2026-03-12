@@ -26,7 +26,7 @@
     <!-- CONTENT -->
     <div class="content">
 
-      <h1>🎸 สินค้า</h1>
+      <h1>{{ pageTitle }}</h1>
 
       <!-- FILTER BAR -->
       <div class="top-bar">
@@ -43,6 +43,12 @@
           <option value="default">เรียงตามปกติ</option>
           <option value="lowToHigh">ราคาต่ำ → สูง</option>
           <option value="highToLow">ราคาสูง → ต่ำ</option>
+        </select>
+
+        <select v-model="selectedType" @change="onTypeChange">
+          <option value="all">ทุกประเภท</option>
+          <option value="instrument">เครื่องดนตรี</option>
+          <option value="accessory">อุปกรณ์เสริม</option>
         </select>
 
       </div>
@@ -146,6 +152,7 @@ const authStore = useAuthStore()
 const searchText = ref('')
 const sortOption = ref('default')
 const selectedCategory = ref('all')
+const selectedType = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 6
 const products = ref([])
@@ -167,6 +174,17 @@ const adminForm = ref({
   image: ''
 })
 const isAdmin = computed(() => authStore.user?.role === 'admin')
+const pageTitle = computed(() => {
+  if (selectedType.value === 'instrument') {
+    return '🎸 เครื่องดนตรี'
+  }
+
+  if (selectedType.value === 'accessory') {
+    return '🎧 อุปกรณ์เสริม'
+  }
+
+  return '🎼 สินค้าทั้งหมด'
+})
 
 /* ================= CATEGORY ================= */
 
@@ -186,11 +204,24 @@ watch(() => route.params.categoryName, (val) => {
   currentPage.value = 1
 }, { immediate: true })
 
+const onTypeChange = () => {
+  selectedCategory.value = 'all'
+  currentPage.value = 1
+
+  if (route.params.categoryName) {
+    router.push('/products')
+  }
+}
+
 const fetchCategories = async () => {
+  const params = {}
+
+  if (selectedType.value !== 'all') {
+    params.type = selectedType.value
+  }
+
   const response = await api.get('/products/categories', {
-    params: {
-      type: 'instrument'
-    }
+    params
   })
 
   categoryItems.value = response.data.categories || []
@@ -208,7 +239,7 @@ const fetchProducts = async () => {
         category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
         search: searchText.value || undefined,
         sort: sortOption.value,
-        type: 'instrument'
+        type: selectedType.value === 'all' ? undefined : selectedType.value
       }
     })
 
@@ -235,7 +266,8 @@ const goToPage = (page) => {
   currentPage.value = page
 }
 
-watch([searchText, sortOption, selectedCategory, currentPage], fetchProducts)
+watch([searchText, sortOption, selectedCategory, currentPage, selectedType], fetchProducts)
+watch(selectedType, fetchCategories)
 
 onMounted(async () => {
   await fetchCategories()

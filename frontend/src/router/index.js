@@ -5,7 +5,6 @@ import Products from '../views/Products.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import Cart from '../views/Cart.vue'
-import Accessory from '../views/Accessory.vue'
 
 const routes = [
   {
@@ -34,11 +33,10 @@ const routes = [
     component: Cart
   },
   {
-  path: '/accessory',
-  name: 'Accessory',
-  component: Accessory
-},
-{
+    path: '/accessory',
+    redirect: '/products'
+  },
+  {
     path: '/category/:categoryName',
     component: Products
   }

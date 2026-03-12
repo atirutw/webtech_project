@@ -9,7 +9,7 @@ type UserRow = {
     created_at: Date
 }
 
-type PublicUser = {
+export type PublicUser = {
     id: number
     name: string
     email: string

@@ -4,6 +4,7 @@ import express from 'express'
 import { errorHandler } from './middleware/error-handler'
 import { authRouter } from './routes/auth.routes'
 import { healthRouter } from './routes/health.routes'
+import { productRouter } from './routes/product.routes'
 
 export const app = express()
 
@@ -12,6 +13,7 @@ app.use(express.json())
 
 app.use('/health', healthRouter)
 app.use('/auth', authRouter)
+app.use('/products', productRouter)
 
 app.use((_req, res) => {
     res.status(404).json({

@@ -9,13 +9,15 @@
         <label>เลือกแบรนด์:</label>
         <select v-model="selectedBrand">
           <option value="">ทั้งหมด</option>
-          <option value="Fender">Fender</option>
-          <option value="Yamaha">Yamaha</option>
-          <option value="Boss">Boss</option>
-          <option value="Ernie Ball">Ernie Ball</option>
+          <option v-for="brand in brands" :key="brand" :value="brand">
+            {{ brand }}
+          </option>
         </select>
       </div>
     </div>
+
+    <p v-if="errorMessage" class="empty">{{ errorMessage }}</p>
+    <p v-if="isLoading" class="empty">กำลังโหลดสินค้า...</p>
 
     <!-- Product Grid -->
     <div class="grid">
@@ -25,7 +27,7 @@
         class="card"
       >
         <div class="image-box">
-          <img :src="item.image" />
+          <img :src="item.image || fallbackImage" />
         </div>
 
         <div class="info">
@@ -40,7 +42,7 @@
       </div>
     </div>
 
-    <div v-if="filteredProducts.length === 0" class="empty">
+    <div v-if="!errorMessage && !isLoading && filteredProducts.length === 0" class="empty">
       ไม่มีสินค้าในหมวดนี้
     </div>
 
@@ -48,55 +50,59 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+
+import { api } from '../lib/api'
 import { useCartStore } from '../stores/cart'
 
 const cartStore = useCartStore()
 const selectedBrand = ref('')
+const products = ref([])
+const isLoading = ref(false)
+const errorMessage = ref('')
+const fallbackImage = '/src/assets/music.jpg'
 
-const products = [
-  {
-    id: 1,
-    name: 'Fender Guitar Cable',
-    brand: 'Fender',
-    price: 590,
-    image: '/src/assets/accessory/Guitar Cable.jpg',
-    type: 'accessory'
-  },
-  {
-    id: 2,
-    name: 'Boss Distortion Pedal',
-    brand: 'Boss',
-    price: 3500,
-    image: '/src/assets/accessory/Boss Disirtion pedal.jpg',
-     type: 'accessory'
-  },
-  {
-    id: 3,
-    name: 'Ernie Ball Guitar Strings',
-    brand: 'Ernie Ball',
-    price: 250,
-    image: '/src/assets/accessory/Guitar Strings.jpg',
-     type: 'accessory'
-  },
-  {
-    id: 4,
-    name: 'Yamaha Guitar Strap',
-    brand: 'Yamaha',
-    price: 450,
-    image: '/src/assets/accessory/Yamaha Guitar Strap.jpg',
-     type: 'accessory'
-  }
-]
+const brands = computed(() => {
+  const allBrands = products.value
+    .map((product) => product.brand)
+    .filter(Boolean)
+
+  return [...new Set(allBrands)]
+})
 
 const filteredProducts = computed(() => {
-  if (!selectedBrand.value) return products
-  return products.filter(p => p.brand === selectedBrand.value)
+  if (!selectedBrand.value) return products.value
+  return products.value.filter(p => p.brand === selectedBrand.value)
 })
+
+const fetchAccessories = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await api.get('/products', {
+      params: {
+        type: 'accessory',
+        page: 1,
+        limit: 50,
+        sort: 'default'
+      }
+    })
+
+    products.value = response.data.items || []
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.message || 'โหลดสินค้าไม่สำเร็จ'
+    products.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const addToCart = (product) => {
   cartStore.addToCart(product)
 }
+
+onMounted(fetchAccessories)
 </script>
 
 <style scoped>

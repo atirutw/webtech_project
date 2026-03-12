@@ -21,12 +21,16 @@ import { onMounted } from 'vue'
 
 import Navbar from './components/Navbar.vue'
 import { useAuthStore } from './stores/auth'
+import { useCartStore } from './stores/cart'
 import bg from './assets/music.jpg'
 
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 
 onMounted(async () => {
   await authStore.initializeSession()
+  await cartStore.mergeGuestCartIntoServerCart()
+  await cartStore.loadCart()
 })
 </script>
 

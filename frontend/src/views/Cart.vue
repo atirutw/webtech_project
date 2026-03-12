@@ -69,10 +69,14 @@
 
         <button
           class="checkout"
-          :disabled="items.length === 0"
+          :disabled="isCheckoutDisabled"
+          @click="handleCheckout"
         >
-          ชำระเงิน
+          {{ isCheckingOut ? 'กำลังชำระเงิน...' : 'ชำระเงิน' }}
         </button>
+
+        <p v-if="cartStore.errorMessage" class="error-msg">{{ cartStore.errorMessage }}</p>
+        <p v-if="checkoutSuccessMessage" class="success-msg">{{ checkoutSuccessMessage }}</p>
       </div>
 
     </div>
@@ -80,16 +84,40 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from "vue"
 import { useCartStore } from "../stores/cart"
 import { storeToRefs } from "pinia"
+import { useAuthStore } from "../stores/auth"
 
 const cartStore = useCartStore()
+const authStore = useAuthStore()
+const isCheckingOut = ref(false)
+const checkoutSuccessMessage = ref("")
 
 // ✅ ทำให้ reactive จริง
 const { items, totalPrice } = storeToRefs(cartStore)
 
 // เรียก action ตรง ๆ
 const { increase, decrease, removeFromCart } = cartStore
+
+const isCheckoutDisabled = computed(() => items.value.length === 0 || !authStore.isAuthenticated || isCheckingOut.value)
+
+const handleCheckout = async () => {
+  checkoutSuccessMessage.value = ""
+  isCheckingOut.value = true
+
+  const order = await cartStore.checkout()
+
+  if (order) {
+    checkoutSuccessMessage.value = `ชำระเงินสำเร็จ ออเดอร์ #${order.id}`
+  }
+
+  isCheckingOut.value = false
+}
+
+onMounted(async () => {
+  await cartStore.loadCart()
+})
 </script>
 
 <style scoped>
@@ -173,6 +201,16 @@ const { increase, decrease, removeFromCart } = cartStore
 .checkout:disabled {
   background: gray;
   cursor: not-allowed;
+}
+
+.error-msg {
+  margin-top: 10px;
+  color: #ff8a8a;
+}
+
+.success-msg {
+  margin-top: 10px;
+  color: #80ff9d;
 }
 
 @media (max-width: 900px) {

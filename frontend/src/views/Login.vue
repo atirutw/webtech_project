@@ -38,6 +38,7 @@ import { ref } from "vue"
 import { useRouter } from "vue-router"
 
 import { useAuthStore } from "../stores/auth"
+import { useCartStore } from "../stores/cart"
 
 const email = ref("")
 const password = ref("")
@@ -45,6 +46,7 @@ const errorMessage = ref("")
 const isSubmitting = ref(false)
 const router = useRouter()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 
 const handleLogin = async () => {
   errorMessage.value = ""
@@ -55,6 +57,8 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value
     })
+    await cartStore.mergeGuestCartIntoServerCart()
+    await cartStore.loadCart()
 
     router.push("/")
   } catch (error) {

@@ -14,6 +14,10 @@
         📦 สินค้า
       </router-link>
 
+      <router-link v-if="auth.user?.role === 'admin'" to="/admin" class="nav-link">
+        🛠️ Admin
+      </router-link>
+
       <!-- ตะกร้า + Badge -->
       <router-link to="/cart" class="nav-link cart-link">
         🛒 ตะกร้า

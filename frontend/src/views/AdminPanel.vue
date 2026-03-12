@@ -1,29 +1,29 @@
 <template>
   <div class="admin-page">
     <div class="panel">
-      <h1>Admin Panel</h1>
+      <h1 class="h3 mb-3">Admin Panel</h1>
 
       <section class="section">
-        <h2>จัดการสินค้า</h2>
+        <h2 class="h5 mb-3">จัดการสินค้า</h2>
         <div class="form-grid">
           <div class="field">
             <label>ชื่อสินค้า</label>
-            <input v-model="productForm.name" type="text" placeholder="เช่น Fender Stratocaster" />
+            <input v-model="productForm.name" class="form-control" type="text" placeholder="เช่น Fender Stratocaster" />
           </div>
 
           <div class="field">
             <label>แบรนด์</label>
-            <input v-model="productForm.brand" type="text" placeholder="เช่น Fender" />
+            <input v-model="productForm.brand" class="form-control" type="text" placeholder="เช่น Fender" />
           </div>
 
           <div class="field">
             <label>หมวดหมู่</label>
-            <input v-model="productForm.category" type="text" placeholder="เช่น guitar" />
+            <input v-model="productForm.category" class="form-control" type="text" placeholder="เช่น guitar" />
           </div>
 
           <div class="field">
             <label>ประเภทสินค้า</label>
-            <select v-model="productForm.type">
+            <select v-model="productForm.type" class="form-select">
               <option value="instrument">instrument</option>
               <option value="accessory">accessory</option>
             </select>
@@ -31,27 +31,30 @@
 
           <div class="field">
             <label>ราคา</label>
-            <input v-model.number="productForm.price" type="number" min="0" placeholder="เช่น 12900" />
+            <input v-model.number="productForm.price" class="form-control" type="number" min="0" placeholder="เช่น 12900" />
           </div>
 
           <div class="field">
             <label>สต็อก</label>
-            <input v-model.number="productForm.stock" type="number" min="0" placeholder="เช่น 20" />
+            <input v-model.number="productForm.stock" class="form-control" type="number" min="0" placeholder="เช่น 20" />
           </div>
 
           <div class="field wide">
             <label>URL รูปภาพ</label>
-            <input v-model="productForm.image" type="text" placeholder="https://..." />
+            <input v-model="productForm.image" class="form-control" type="text" placeholder="https://..." />
           </div>
         </div>
 
-        <button class="primary" :disabled="isSubmittingProduct" @click="createProduct">
+        <button class="btn btn-warning fw-semibold" :disabled="isSubmittingProduct" @click="createProduct">
+          <span v-if="isSubmittingProduct" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
           {{ isSubmittingProduct ? 'กำลังบันทึก...' : 'เพิ่มสินค้า' }}
         </button>
-        <p v-if="productMessage" class="message">{{ productMessage }}</p>
+        <div v-if="productMessage" class="alert mt-3 mb-0 py-2" :class="productMessage.includes('ไม่สำเร็จ') ? 'alert-danger' : 'alert-success'">
+          {{ productMessage }}
+        </div>
 
         <div class="table-wrap">
-          <table>
+          <table class="table table-dark table-hover align-middle mb-0">
             <thead>
               <tr>
                 <th>ID</th>
@@ -66,12 +69,16 @@
               <tr v-for="item in products" :key="item.id">
                 <td>{{ item.id }}</td>
                 <td>{{ item.name }}</td>
-                <td>{{ item.type }}</td>
+                <td>
+                  <span class="badge" :class="item.type === 'instrument' ? 'text-bg-primary' : 'text-bg-info'">
+                    {{ item.type }}
+                  </span>
+                </td>
                 <td>{{ item.price }}</td>
                 <td>{{ item.stock }}</td>
                 <td class="actions">
-                  <button @click="editProduct(item)">แก้ไข</button>
-                  <button class="danger" @click="deleteProduct(item.id)">ลบ</button>
+                  <button class="btn btn-outline-warning btn-sm" @click="editProduct(item)">แก้ไข</button>
+                  <button class="btn btn-outline-danger btn-sm" @click="deleteProduct(item.id)">ลบ</button>
                 </td>
               </tr>
             </tbody>
@@ -80,10 +87,12 @@
       </section>
 
       <section class="section">
-        <h2>จัดการผู้ใช้</h2>
-        <p v-if="userMessage" class="message">{{ userMessage }}</p>
+        <h2 class="h5 mb-3">จัดการผู้ใช้</h2>
+        <div v-if="userMessage" class="alert mb-3 py-2" :class="userMessage.includes('ไม่สำเร็จ') ? 'alert-danger' : 'alert-success'">
+          {{ userMessage }}
+        </div>
         <div class="table-wrap">
-          <table>
+          <table class="table table-dark table-hover align-middle mb-0">
             <thead>
               <tr>
                 <th>ID</th>
@@ -97,21 +106,21 @@
               <tr v-for="user in users" :key="user.id">
                 <td>{{ user.id }}</td>
                 <td>
-                  <input v-model="userDrafts[user.id].name" type="text" />
+                  <input v-model="userDrafts[user.id].name" class="form-control form-control-sm" type="text" />
                 </td>
                 <td>
-                  <input v-model="userDrafts[user.id].email" type="email" />
+                  <input v-model="userDrafts[user.id].email" class="form-control form-control-sm" type="email" />
                 </td>
                 <td>
-                  <select v-model="userDrafts[user.id].role" :disabled="user.id === authStore.user?.id">
+                  <select v-model="userDrafts[user.id].role" class="form-select form-select-sm" :disabled="user.id === authStore.user?.id">
                     <option value="customer">customer</option>
                     <option value="admin">admin</option>
                   </select>
                 </td>
                 <td class="actions">
-                  <button @click="saveUser(user.id)">บันทึก</button>
+                  <button class="btn btn-outline-success btn-sm" @click="saveUser(user.id)">บันทึก</button>
                   <button
-                    class="danger"
+                    class="btn btn-outline-danger btn-sm"
                     :disabled="user.id === authStore.user?.id"
                     @click="deleteUser(user.id)">
                     ลบ
@@ -321,7 +330,7 @@ onMounted(async () => {
 
 .section {
   margin-top: 24px;
-  padding: 18px;
+  padding: 20px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.65);
 }
@@ -350,26 +359,12 @@ onMounted(async () => {
 }
 
 input,
-select,
-button {
-  padding: 8px 10px;
+select {
   border-radius: 8px;
-  border: none;
 }
 
-.primary {
-  background: #ffc107;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.primary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.message {
-  margin-top: 10px;
+button {
+  border-radius: 8px;
 }
 
 .table-wrap {
@@ -377,25 +372,8 @@ button {
   margin-top: 14px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 10px;
-  text-align: left;
-}
-
 .actions {
   display: flex;
   gap: 6px;
-}
-
-button.danger {
-  background: #e53935;
-  color: white;
 }
 </style>

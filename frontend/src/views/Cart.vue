@@ -1,84 +1,100 @@
 <template>
   <div class="cart-page">
-    <div class="cart-container">
+    <div class="container-fluid px-0">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="cart-card card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="h4 mb-4">🛒 ตะกร้าสินค้า</h2>
 
-      <!-- LEFT -->
-      <div class="cart-card">
-        <h2>🛒 ตะกร้าสินค้า</h2>
+              <div v-if="items.length === 0" class="text-center py-4">
+                <p class="mb-3">ตะกร้ายังว่างอยู่</p>
+                <router-link to="/products" class="btn btn-warning fw-semibold">
+                  ไปเลือกสินค้า
+                </router-link>
+              </div>
 
-        <div v-if="items.length === 0" class="empty">
-          <p>ตะกร้ายังว่างอยู่</p>
-          <router-link to="/products" class="shop-btn">
-            ไปเลือกสินค้า
-          </router-link>
+              <ul v-else class="list-group list-group-flush">
+                <li
+                  v-for="item in items"
+                  :key="item.cartKey"
+                  class="list-group-item bg-transparent text-light border-secondary-subtle px-0"
+                >
+                  <div class="row g-3 align-items-center">
+                    <div class="col-3 col-md-2">
+                      <img :src="item.image" class="item-img" />
+                    </div>
+
+                    <div class="col-9 col-md-4">
+                      <h4 class="h6 mb-1">{{ item.name }}</h4>
+                      <p class="mb-0 text-light-emphasis">{{ item.price }} บาท</p>
+                    </div>
+
+                    <div class="col-7 col-md-3">
+                      <div class="btn-group" role="group" aria-label="Quantity controls">
+                        <button class="btn btn-outline-warning btn-sm" @click="decrease(item.cartKey)">-</button>
+                        <button class="btn btn-outline-light btn-sm" disabled>{{ item.qty }}</button>
+                        <button class="btn btn-outline-warning btn-sm" @click="increase(item.cartKey)">+</button>
+                      </div>
+                    </div>
+
+                    <div class="col-3 col-md-2 fw-semibold">
+                      {{ item.price * item.qty }} ฿
+                    </div>
+
+                    <div class="col-2 col-md-1 text-end">
+                      <button class="btn btn-outline-danger btn-sm" @click="removeFromCart(item.cartKey)">
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
-        <div v-else>
-          <div
-            v-for="item in items"
-            :key="item.cartKey"
-            class="item"
-          >
-            <img :src="item.image" class="item-img" />
+        <div class="col-lg-4">
+          <div class="summary-card card border-0 shadow-sm position-sticky" style="top: 100px;">
+            <div class="card-body p-4">
+              <h3 class="h5 mb-3">สรุปคำสั่งซื้อ</h3>
 
-            <div class="info">
-              <h4>{{ item.name }}</h4>
-              <p>{{ item.price }} บาท</p>
+              <div class="d-flex justify-content-between mb-2">
+                <span>รวมสินค้า</span>
+                <span>{{ totalPrice }} ฿</span>
+              </div>
+
+              <div class="d-flex justify-content-between mb-2">
+                <span>ค่าจัดส่ง</span>
+                <span class="text-success">ฟรี</span>
+              </div>
+
+              <hr class="border-secondary" />
+
+              <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                <span>รวมทั้งหมด</span>
+                <span>{{ totalPrice }} ฿</span>
+              </div>
+
+              <button
+                class="btn btn-warning w-100 fw-semibold"
+                :disabled="isCheckoutDisabled"
+                @click="handleCheckout"
+              >
+                <span v-if="isCheckingOut" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ isCheckingOut ? 'กำลังชำระเงิน...' : 'ชำระเงิน' }}
+              </button>
+
+              <div v-if="cartStore.errorMessage" class="alert alert-danger py-2 mt-3 mb-0">
+                {{ cartStore.errorMessage }}
+              </div>
+              <div v-if="checkoutSuccessMessage" class="alert alert-success py-2 mt-3 mb-0">
+                {{ checkoutSuccessMessage }}
+              </div>
             </div>
-
-            <div class="qty">
-              <button @click="decrease(item.cartKey)">-</button>
-              <span>{{ item.qty }}</span>
-              <button @click="increase(item.cartKey)">+</button>
-            </div>
-
-            <div class="total">
-              {{ item.price * item.qty }} ฿
-            </div>
-
-            <button
-              class="remove"
-              @click="removeFromCart(item.cartKey)"
-            >
-              ✕
-            </button>
           </div>
         </div>
       </div>
-
-      <!-- RIGHT -->
-      <div class="summary-card">
-        <h3>สรุปคำสั่งซื้อ</h3>
-
-        <div class="row">
-          <span>รวมสินค้า</span>
-          <span>{{ totalPrice }} ฿</span>
-        </div>
-
-        <div class="row">
-          <span>ค่าจัดส่ง</span>
-          <span style="color:#00ff99;">ฟรี</span>
-        </div>
-
-        <hr />
-
-        <div class="row total-row">
-          <span>รวมทั้งหมด</span>
-          <span>{{ totalPrice }} ฿</span>
-        </div>
-
-        <button
-          class="checkout"
-          :disabled="isCheckoutDisabled"
-          @click="handleCheckout"
-        >
-          {{ isCheckingOut ? 'กำลังชำระเงิน...' : 'ชำระเงิน' }}
-        </button>
-
-        <p v-if="cartStore.errorMessage" class="error-msg">{{ cartStore.errorMessage }}</p>
-        <p v-if="checkoutSuccessMessage" class="success-msg">{{ checkoutSuccessMessage }}</p>
-      </div>
-
     </div>
   </div>
 </template>
@@ -126,96 +142,23 @@ onMounted(async () => {
   padding: 120px 5% 50px;
 }
 
-.cart-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 40px;
-}
-
 .cart-card,
 .summary-card {
   background: rgba(0,0,0,0.7);
   backdrop-filter: blur(15px);
-  border-radius: 20px;
-  padding: 30px;
   color: white;
 }
 
-.item {
-  display: grid;
-  grid-template-columns: 80px 1fr auto auto auto;
-  gap: 20px;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
 .item-img {
-  width: 70px;
-  border-radius: 10px;
-}
-
-.qty {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.qty button {
-  background: orange;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.remove {
-  background: transparent;
-  border: none;
-  color: red;
-  cursor: pointer;
-}
-
-.summary-card .row {
-  display: flex;
-  justify-content: space-between;
-  margin: 10px 0;
-}
-
-.total-row {
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.checkout {
-  margin-top: 20px;
   width: 100%;
-  padding: 12px;
-  border: none;
+  max-width: 72px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   border-radius: 10px;
-  background: linear-gradient(45deg, #ffb300, #ff8800);
-  font-weight: bold;
-  cursor: pointer;
 }
-
-.checkout:disabled {
-  background: gray;
-  cursor: not-allowed;
-}
-
-.error-msg {
-  margin-top: 10px;
-  color: #ff8a8a;
-}
-
-.success-msg {
-  margin-top: 10px;
-  color: #80ff9d;
-}
-
-@media (max-width: 900px) {
-  .cart-container {
-    grid-template-columns: 1fr;
+@media (max-width: 768px) {
+  .cart-page {
+    padding-inline: 16px;
   }
 }
 </style>

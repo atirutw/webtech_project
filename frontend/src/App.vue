@@ -17,8 +17,17 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+
 import Navbar from './components/Navbar.vue'
+import { useAuthStore } from './stores/auth'
 import bg from './assets/music.jpg'
+
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  await authStore.initializeSession()
+})
 </script>
 
 <style>

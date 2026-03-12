@@ -23,8 +23,12 @@
           <label>Password</label>
         </div>
 
-        <button type="submit">Register</button>
+        <button type="submit" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Registering...' : 'Register' }}
+        </button>
       </form>
+
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
       <p class="login-link">
         Already have an account?
@@ -36,13 +40,35 @@
 
 <script setup>
 import { ref } from "vue"
+import { useRouter } from "vue-router"
+
+import { useAuthStore } from "../stores/auth"
 
 const name = ref("")
 const email = ref("")
 const password = ref("")
+const errorMessage = ref("")
+const isSubmitting = ref(false)
+const router = useRouter()
+const authStore = useAuthStore()
 
-const handleRegister = () => {
-  console.log(name.value, email.value, password.value)
+const handleRegister = async () => {
+  errorMessage.value = ""
+  isSubmitting.value = true
+
+  try {
+    await authStore.registerFirstAdmin({
+      name: name.value,
+      email: email.value,
+      password: password.value
+    })
+
+    router.push("/")
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.message || "Register failed"
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -165,6 +191,17 @@ button {
 button:hover {
   transform: scale(1.08);
   box-shadow: 0 0 25px gold;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 12px;
+  color: #ff6b6b;
+  font-size: 13px;
 }
 
 .login-link {

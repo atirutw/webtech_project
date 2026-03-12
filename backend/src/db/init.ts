@@ -7,8 +7,13 @@ const initStatements = [
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'customer',
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
+    `,
+    `
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'customer'
     `,
     `
     CREATE TABLE IF NOT EXISTS products (
@@ -50,6 +55,19 @@ const initStatements = [
         quantity INTEGER NOT NULL CHECK (quantity > 0),
         price_at_purchase NUMERIC(12, 2) NOT NULL CHECK (price_at_purchase >= 0)
     )
+    `,
+    `
+    CREATE TABLE IF NOT EXISTS auth_tokens (
+        id BIGSERIAL PRIMARY KEY,
+        user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token_hash TEXT NOT NULL UNIQUE,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+    `,
+    `
+    CREATE INDEX IF NOT EXISTS auth_tokens_expires_at_idx
+    ON auth_tokens (expires_at)
     `,
 ]
 

@@ -18,8 +18,12 @@
           <label>Password</label>
         </div>
 
-        <button type="submit">Login</button>
+        <button type="submit" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Logging in...' : 'Login' }}
+        </button>
       </form>
+
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
       <p class="register-link">
         ยังไม่มีบัญชี?
@@ -31,12 +35,33 @@
 
 <script setup>
 import { ref } from "vue"
+import { useRouter } from "vue-router"
+
+import { useAuthStore } from "../stores/auth"
 
 const email = ref("")
 const password = ref("")
+const errorMessage = ref("")
+const isSubmitting = ref(false)
+const router = useRouter()
+const authStore = useAuthStore()
 
-const handleLogin = () => {
-  console.log(email.value, password.value)
+const handleLogin = async () => {
+  errorMessage.value = ""
+  isSubmitting.value = true
+
+  try {
+    await authStore.login({
+      email: email.value,
+      password: password.value
+    })
+
+    router.push("/")
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.message || "Login failed"
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -159,6 +184,17 @@ button {
 button:hover {
   transform: scale(1.08);
   box-shadow: 0 0 25px gold;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 12px;
+  color: #ff6b6b;
+  font-size: 13px;
 }
 
 .register-link {

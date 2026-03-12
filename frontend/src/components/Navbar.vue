@@ -46,8 +46,14 @@
 
     <!-- ด้านขวา -->
     <div class="right">
-      <router-link to="/login" class="login-btn">Login</router-link>
-      <router-link to="/register" class="register-btn">Register</router-link>
+      <template v-if="auth.isAuthenticated">
+        <span class="user-pill">{{ auth.user?.name }}</span>
+        <button class="login-btn" @click="handleLogout">Logout</button>
+      </template>
+      <template v-else>
+        <router-link to="/login" class="login-btn">Login</router-link>
+        <router-link to="/register" class="register-btn">Register</router-link>
+      </template>
     </div>
 
   </nav>
@@ -55,9 +61,14 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
 
 const cart = useCartStore()
+const auth = useAuthStore()
+const router = useRouter()
 const isScrolled = ref(false)
 
 const handleScroll = () => {
@@ -66,6 +77,11 @@ const handleScroll = () => {
 
 onMounted(() => window.addEventListener('scroll', handleScroll))
 onUnmounted(() => window.removeEventListener('scroll', handleScroll))
+
+const handleLogout = async () => {
+  await auth.logout()
+  router.push('/login')
+}
 </script>
 
 <style scoped>
@@ -216,16 +232,29 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 /* ===== Right Buttons ===== */
 .right {
   display: flex;
+  align-items: center;
   gap: 18px;
+}
+
+.user-pill {
+  border: 1px solid rgba(255,255,255,0.4);
+  padding: 7px 14px;
+  border-radius: 999px;
+  color: white;
+  font-size: 14px;
 }
 
 .login-btn {
   border: 1px solid rgba(255,255,255,0.6);
   padding: 7px 20px;
   border-radius: 8px;
+  background: transparent;
   text-decoration: none;
   color: white;
   transition: 0.3s;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .login-btn:hover {

@@ -17,7 +17,7 @@
             :class="{ active: selectedFacet === `type:${group.type}` }"
             @click="goType(group.type)"
           >
-            ทั้งหมด{{ group.label }} ({{ group.count }})
+            {{ group.label }}ทั้งหมด ({{ group.count }})
           </li>
 
           <li
@@ -34,7 +34,10 @@
 
     <section class="content">
       <header class="content-head">
-        <h1>{{ pageTitle }}</h1>
+        <h1>
+          <i :class="`bi ${pageIconClass}`" aria-hidden="true"></i>
+          {{ pageTitle }}
+        </h1>
         <p>{{ totalItems }} รายการ</p>
       </header>
 
@@ -76,16 +79,16 @@
       </p>
 
       <div class="pagination" v-if="totalPages > 1">
-        <button :disabled="currentPage === 1" @click="currentPage--">
-          ◀
+        <button :disabled="currentPage === 1" @click="currentPage--" aria-label="Previous page">
+          <i class="bi bi-chevron-left" aria-hidden="true"></i>
         </button>
 
         <button v-for="page in totalPages" :key="page" :class="{ activePage: currentPage === page }" @click="goToPage(page)">
           {{ page }}
         </button>
 
-        <button :disabled="currentPage === totalPages" @click="currentPage++">
-          ▶
+        <button :disabled="currentPage === totalPages" @click="currentPage++" aria-label="Next page">
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
         </button>
       </div>
     </section>
@@ -128,19 +131,35 @@ const pageTitle = computed(() => {
   if (selectedCategory.value !== 'all') {
     const match = categoryItems.value.find((item) => item.category === selectedCategory.value)
     if (match) {
-      return `🎼 ${match.displayName || match.category}`
+      return match.displayName || match.category
     }
   }
 
   if (selectedType.value === 'instrument') {
-    return '🎸 เครื่องดนตรี'
+    return 'เครื่องดนตรี'
   }
 
   if (selectedType.value === 'accessory') {
-    return '🎧 อุปกรณ์เสริม'
+    return 'อุปกรณ์เสริม'
   }
 
-  return '🎼 สินค้าทั้งหมด'
+  return 'สินค้าทั้งหมด'
+})
+
+const pageIconClass = computed(() => {
+  if (selectedCategory.value !== 'all') {
+    return 'bi-tag'
+  }
+
+  if (selectedType.value === 'instrument') {
+    return 'bi-music-note-beamed'
+  }
+
+  if (selectedType.value === 'accessory') {
+    return 'bi-headphones'
+  }
+
+  return 'bi-grid-3x3-gap'
 })
 
 const groupedCategories = computed(() => {
@@ -355,6 +374,9 @@ const addToCart = (product) => {
 
 .content-head h1 {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: clamp(1.35rem, 2vw, 1.85rem);
 }
 

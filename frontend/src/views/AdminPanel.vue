@@ -325,14 +325,15 @@ onMounted(async () => {
 .panel {
   max-width: 1200px;
   margin: 0 auto;
-  color: white;
+  color: var(--text-primary);
 }
 
 .section {
   margin-top: 24px;
   padding: 20px;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
 }
 
 .form-grid {
@@ -351,7 +352,7 @@ onMounted(async () => {
 .field label {
   font-size: 13px;
   font-weight: 600;
-  opacity: 0.9;
+  color: var(--text-secondary);
 }
 
 .wide {

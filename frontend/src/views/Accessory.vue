@@ -3,7 +3,10 @@
 
     <!-- Header Section -->
     <div class="header">
-      <h1>🎧 อุปกรณ์เสริม</h1>
+      <h1>
+        <i class="bi bi-headphones" aria-hidden="true"></i>
+        อุปกรณ์เสริม
+      </h1>
 
       <div class="filter-box">
         <label>เลือกแบรนด์:</label>
@@ -155,6 +158,9 @@ onMounted(fetchAccessories)
 }
 
 .header h1 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: clamp(1.4rem, 2vw, 1.9rem);
   font-weight: 700;
   margin: 0;

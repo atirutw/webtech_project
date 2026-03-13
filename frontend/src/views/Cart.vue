@@ -5,7 +5,10 @@
         <div class="col-lg-8">
           <div class="cart-card card border-0 shadow-sm">
             <div class="card-body p-4">
-              <h2 class="h4 mb-4">🛒 ตะกร้าสินค้า</h2>
+              <h2 class="h4 mb-4 cart-title">
+                <i class="bi bi-cart3" aria-hidden="true"></i>
+                ตะกร้าสินค้า
+              </h2>
 
               <div v-if="items.length === 0" class="text-center py-4">
                 <p class="mb-3">ตะกร้ายังว่างอยู่</p>
@@ -18,7 +21,7 @@
                 <li
                   v-for="item in items"
                   :key="item.cartKey"
-                  class="list-group-item bg-transparent text-light border-secondary-subtle px-0"
+                  class="list-group-item bg-transparent border-secondary-subtle px-0 cart-line"
                 >
                   <div class="row g-3 align-items-center">
                     <div class="col-3 col-md-2">
@@ -27,13 +30,13 @@
 
                     <div class="col-9 col-md-4">
                       <h4 class="h6 mb-1">{{ item.name }}</h4>
-                      <p class="mb-0 text-light-emphasis">{{ item.price }} บาท</p>
+                      <p class="mb-0 item-unit-price">{{ item.price }} บาท</p>
                     </div>
 
                     <div class="col-7 col-md-3">
                       <div class="btn-group" role="group" aria-label="Quantity controls">
                         <button class="btn btn-outline-warning btn-sm" @click="decrease(item.cartKey)">-</button>
-                        <button class="btn btn-outline-light btn-sm" disabled>{{ item.qty }}</button>
+                        <button class="btn btn-outline-secondary btn-sm" disabled>{{ item.qty }}</button>
                         <button class="btn btn-outline-warning btn-sm" @click="increase(item.cartKey)">+</button>
                       </div>
                     </div>
@@ -44,7 +47,7 @@
 
                     <div class="col-2 col-md-1 text-end">
                       <button class="btn btn-outline-danger btn-sm" @click="removeFromCart(item.cartKey)">
-                        ✕
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
                       </button>
                     </div>
                   </div>
@@ -110,10 +113,8 @@ const authStore = useAuthStore()
 const isCheckingOut = ref(false)
 const checkoutSuccessMessage = ref("")
 
-// ✅ ทำให้ reactive จริง
 const { items, totalPrice } = storeToRefs(cartStore)
 
-// เรียก action ตรง ๆ
 const { increase, decrease, removeFromCart } = cartStore
 
 const isCheckoutDisabled = computed(() => items.value.length === 0 || !authStore.isAuthenticated || isCheckingOut.value)
@@ -144,9 +145,23 @@ onMounted(async () => {
 
 .cart-card,
 .summary-card {
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(15px);
-  color: white;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.cart-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-line {
+  color: var(--text-primary);
+}
+
+.item-unit-price {
+  color: var(--text-secondary);
 }
 
 .item-img {

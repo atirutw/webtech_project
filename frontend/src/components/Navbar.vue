@@ -1,62 +1,112 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top glass-nav" :class="{ scrolled: isScrolled }">
-    <div class="container-fluid px-3 px-lg-5">
-      <router-link to="/" class="navbar-brand fw-bold">
-        🎵 Music<span class="text-warning">Store</span>
-      </router-link>
+  <nav class="market-nav fixed-top" :class="{ scrolled: isScrolled }">
+    <div class="container-fluid px-3 px-lg-5 nav-shell-wrap">
+      <div class="nav-shell market-surface">
+        <router-link to="/" class="brand-link">
+          <span class="brand-mark" aria-hidden="true">
+            <i class="bi bi-vinyl-fill"></i>
+          </span>
+          <span class="brand-text">Music<span class="brand-accent">Store</span></span>
+        </router-link>
 
-      <button
-        class="navbar-toggler border-0"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#mainNavbar"
-        aria-controls="mainNavbar"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+        <ul class="nav-center d-none d-lg-flex">
+          <li>
+            <router-link to="/" class="nav-pill" :class="{ active: isHomeRoute }">
+              <i class="bi bi-house-door" aria-hidden="true"></i>
+              หน้าแรก
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/products" class="nav-pill" :class="{ active: isProductsRoute }">
+              <i class="bi bi-box-seam" aria-hidden="true"></i>
+              สินค้า
+            </router-link>
+          </li>
+          <li v-if="auth.user?.role === 'admin'">
+            <router-link to="/admin" class="nav-pill" :class="{ active: isAdminRoute }">
+              <i class="bi bi-shield-lock" aria-hidden="true"></i>
+              Admin
+            </router-link>
+          </li>
+        </ul>
 
-      <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="mainNavbar" aria-labelledby="mainNavbarLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="mainNavbarLabel">เมนู</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <div class="nav-actions d-none d-lg-flex">
+          <router-link to="/cart" class="cart-link" :class="{ active: isCartRoute }">
+            <i class="bi bi-cart3" aria-hidden="true"></i>
+            <span>ตะกร้า</span>
+            <span v-if="cart.items.length > 0" class="cart-count">{{ cart.items.length }}</span>
+          </router-link>
+
+          <template v-if="auth.isAuthenticated">
+            <router-link to="/profile" class="profile-link">
+              <span class="avatar-badge">{{ userInitials }}</span>
+              <span class="profile-name">{{ auth.user?.name }}</span>
+            </router-link>
+            <button class="btn signout-btn" @click="handleLogout">Logout</button>
+          </template>
+
+          <template v-else>
+            <router-link to="/login" class="btn ghost-btn">Login</router-link>
+            <router-link to="/register" class="btn market-btn-primary register-btn">Register</router-link>
+          </template>
         </div>
 
-        <div class="offcanvas-body d-lg-flex align-items-center justify-content-between">
-          <ul class="navbar-nav gap-lg-2 mb-3 mb-lg-0">
-            <li class="nav-item">
-              <router-link to="/" class="nav-link">หน้าแรก</router-link>
-            </li>
+        <button
+          class="mobile-trigger d-lg-none"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#mainNavbar"
+          aria-controls="mainNavbar"
+          aria-label="Toggle navigation"
+        >
+          <i class="bi bi-list" aria-hidden="true"></i>
+        </button>
+      </div>
 
-            <li class="nav-item">
-              <router-link to="/products" class="nav-link">📦 สินค้า</router-link>
-            </li>
+      <div class="offcanvas offcanvas-end menu-drawer" tabindex="-1" id="mainNavbar" aria-labelledby="mainNavbarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="mainNavbarLabel">เมนู</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
 
-            <li class="nav-item" v-if="auth.user?.role === 'admin'">
-              <router-link to="/admin" class="nav-link">🛠️ Admin</router-link>
+        <div class="offcanvas-body">
+          <ul class="mobile-nav-list">
+            <li>
+              <router-link to="/" class="mobile-link" :class="{ active: isHomeRoute }" data-bs-dismiss="offcanvas">
+                <i class="bi bi-house-door" aria-hidden="true"></i>
+                หน้าแรก
+              </router-link>
             </li>
-
-            <li class="nav-item">
-              <router-link to="/cart" class="nav-link d-inline-flex align-items-center gap-2">
-                <span>🛒 ตะกร้า</span>
-                <span v-if="cart.items.length > 0" class="badge rounded-pill text-bg-danger">
-                  {{ cart.items.length }}
-                </span>
+            <li>
+              <router-link to="/products" class="mobile-link" :class="{ active: isProductsRoute }" data-bs-dismiss="offcanvas">
+                <i class="bi bi-box-seam" aria-hidden="true"></i>
+                สินค้า
+              </router-link>
+            </li>
+            <li v-if="auth.user?.role === 'admin'">
+              <router-link to="/admin" class="mobile-link" :class="{ active: isAdminRoute }" data-bs-dismiss="offcanvas">
+                <i class="bi bi-shield-lock" aria-hidden="true"></i>
+                Admin
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/cart" class="mobile-link" :class="{ active: isCartRoute }" data-bs-dismiss="offcanvas">
+                <i class="bi bi-cart3" aria-hidden="true"></i>
+                ตะกร้า
+                <span v-if="cart.items.length > 0" class="cart-count">{{ cart.items.length }}</span>
               </router-link>
             </li>
           </ul>
 
-          <div class="d-flex flex-column flex-lg-row gap-2">
+          <div class="mobile-actions">
             <template v-if="auth.isAuthenticated">
-              <router-link to="/profile" class="btn btn-outline-light btn-sm">
-                {{ auth.user?.name }}
-              </router-link>
-              <button class="btn btn-warning btn-sm" @click="handleLogout">Logout</button>
+              <router-link to="/profile" class="btn ghost-btn w-100" data-bs-dismiss="offcanvas">{{ auth.user?.name }}</router-link>
+              <button class="btn signout-btn w-100" @click="handleLogout" data-bs-dismiss="offcanvas">Logout</button>
             </template>
 
             <template v-else>
-              <router-link to="/login" class="btn btn-outline-light btn-sm">Login</router-link>
-              <router-link to="/register" class="btn btn-warning btn-sm fw-bold">Register</router-link>
+              <router-link to="/login" class="btn ghost-btn w-100" data-bs-dismiss="offcanvas">Login</router-link>
+              <router-link to="/register" class="btn market-btn-primary w-100" data-bs-dismiss="offcanvas">Register</router-link>
             </template>
           </div>
         </div>
@@ -66,16 +116,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
 
 const cart = useCartStore()
 const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const isScrolled = ref(false)
+
+const userInitials = computed(() => {
+  const name = auth.user?.name?.trim() || ''
+
+  if (!name) {
+    return 'U'
+  }
+
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((chunk) => chunk[0]?.toUpperCase() ?? '')
+    .join('')
+})
+
+const isHomeRoute = computed(() => route.path === '/')
+const isProductsRoute = computed(() => route.path.startsWith('/products') || route.path.startsWith('/category/'))
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isCartRoute = computed(() => route.path.startsWith('/cart'))
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
@@ -91,44 +161,234 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
-.glass-nav {
-  min-height: 76px;
-  background: var(--bg-nav);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+.market-nav {
+  padding: 10px 0;
+  transition: padding 0.18s ease;
 }
 
-.glass-nav.scrolled {
-  background: rgba(19, 25, 33, 0.95);
-  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.22);
+.market-nav.scrolled {
+  padding: 6px 0;
 }
 
-.navbar-brand {
+.nav-shell-wrap {
+  position: relative;
+}
+
+.nav-shell {
+  min-height: 74px;
+  border-radius: 18px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
   font-weight: 800;
-  letter-spacing: 0.2px;
-  font-size: 1.45rem;
+  font-size: 1.3rem;
 }
 
-.nav-link {
-  color: rgba(255, 255, 255, 0.84);
-  font-weight: 600;
-  border-radius: 8px;
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(140deg, var(--accent), var(--accent-strong));
+  color: #111827;
+}
+
+.brand-accent {
+  color: var(--accent-strong);
+}
+
+.nav-center {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-pill {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-pill:hover {
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
+}
+
+.nav-pill.active {
+  background: color-mix(in srgb, var(--accent), transparent 82%);
+  color: #9a3412;
+}
+
+.nav-actions {
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   padding: 8px 10px;
+  color: var(--text-primary);
+  font-weight: 700;
+  background: var(--bg-surface-soft);
 }
 
-.nav-link:hover,
-.nav-link.router-link-active {
+.cart-link.active {
+  border-color: color-mix(in srgb, var(--accent), transparent 42%);
+}
+
+.cart-count {
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #dc2626;
   color: #fff;
-  background: rgba(245, 158, 11, 0.22);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
 }
 
-.offcanvas {
-  max-width: 320px;
+.profile-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 5px 10px 5px 6px;
+}
+
+.avatar-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--accent), transparent 74%);
+  color: #9a3412;
+  font-weight: 700;
+  font-size: 0.76rem;
+}
+
+.profile-name {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.ghost-btn,
+.signout-btn {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.register-btn {
+  text-decoration: none;
+}
+
+.mobile-trigger {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.menu-drawer {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.mobile-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.mobile-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
+  font-weight: 700;
+  padding: 10px 12px;
+}
+
+.mobile-link.active {
+  border-color: color-mix(in srgb, var(--accent), transparent 50%);
+}
+
+.mobile-actions {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .brand-accent,
+  .nav-pill.active,
+  .avatar-badge {
+    color: #fbbf24;
+  }
 }
 
 @media (max-width: 991px) {
-  .navbar-brand {
-    font-size: 1.25rem;
+  .market-nav {
+    padding: 8px 0;
+  }
+
+  .nav-shell {
+    min-height: 66px;
+    border-radius: 14px;
+  }
+
+  .brand-link {
+    font-size: 1.16rem;
   }
 }
 </style>

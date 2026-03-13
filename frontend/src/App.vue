@@ -25,6 +25,12 @@ onMounted(async () => {
 <style>
 .app-root {
   min-height: 100vh;
-  padding-top: 76px;
+  padding-top: 96px;
+}
+
+@media (max-width: 991px) {
+  .app-root {
+    padding-top: 84px;
+  }
 }
 </style>

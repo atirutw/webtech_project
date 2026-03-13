@@ -3,15 +3,18 @@
     <div class="bg-overlay"></div>
 
     <div class="login-card card border-0 shadow-lg p-4 p-md-5">
-      <h1 class="text-warning mb-2">Welcome Back</h1>
-      <p class="subtitle text-light-emphasis mb-4">Login to your Music World 🎵</p>
+      <h1 class="text-warning mb-2">
+        <i class="bi bi-person-circle me-2" aria-hidden="true"></i>
+        Welcome Back
+      </h1>
+      <p class="subtitle mb-4">Login to your Music World</p>
 
       <form @submit.prevent="handleLogin" class="d-grid gap-3">
         <div class="form-floating">
           <input
             v-model="email"
             type="email"
-            class="form-control form-control-lg bg-dark-subtle border-secondary"
+            class="form-control form-control-lg market-auth-input"
             id="email"
             placeholder="Email"
             required
@@ -23,7 +26,7 @@
           <input
             v-model="password"
             type="password"
-            class="form-control form-control-lg bg-dark-subtle border-secondary"
+            class="form-control form-control-lg market-auth-input"
             id="password"
             placeholder="Password"
             required
@@ -41,7 +44,7 @@
         {{ errorMessage }}
       </div>
 
-      <p class="register-link mt-4 mb-0 text-light">
+      <p class="register-link mt-4 mb-0">
         ยังไม่มีบัญชี?
         <router-link to="/register" class="text-warning">สมัครสมาชิก</router-link>
       </p>
@@ -100,7 +103,7 @@ const handleLogin = async () => {
 .bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(2, 6, 23, 0.62);
 }
 
 .login-card {
@@ -108,9 +111,11 @@ const handleLogin = async () => {
   width: 440px;
   max-width: 100%;
   border-radius: 20px;
-  background: rgba(10, 10, 40, 0.88);
+  background: color-mix(in srgb, var(--bg-surface), transparent 6%);
+  border: 1px solid var(--border);
   backdrop-filter: blur(15px);
   z-index: 2;
+  color: var(--text-primary);
 }
 
 .login-card h1 {
@@ -121,6 +126,23 @@ const handleLogin = async () => {
 .subtitle {
   font-size: 14px;
   text-align: center;
+  color: var(--text-secondary);
+}
+
+.market-auth-input {
+  background: var(--bg-surface-soft);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.market-auth-input:focus {
+  background: var(--bg-surface-soft);
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+}
+
+.register-link {
+  color: var(--text-secondary);
 }
 
 .register-link {

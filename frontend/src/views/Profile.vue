@@ -110,8 +110,9 @@ const handleProfileUpdate = async () => {
 .profile-card {
   width: 460px;
   max-width: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
   border-radius: 16px;
-  color: white;
 }
 </style>

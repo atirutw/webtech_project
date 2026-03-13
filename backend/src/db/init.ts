@@ -29,6 +29,18 @@ const initStatements = [
     )
     `,
     `
+    CREATE TABLE IF NOT EXISTS product_category_display (
+        category TEXT PRIMARY KEY,
+        display_name TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+    `,
+    `
+    ALTER TABLE product_category_display
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    `,
+    `
     CREATE TABLE IF NOT EXISTS cart_items (
         id BIGSERIAL PRIMARY KEY,
         user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

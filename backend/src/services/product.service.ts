@@ -21,7 +21,9 @@ export const getProducts = async (params: {
     return listProducts(params)
 }
 
-export const getCategoryCounts = async (type?: string): Promise<Array<{ category: string; count: number }>> => {
+export const getCategoryCounts = async (
+    type?: string,
+): Promise<Array<{ category: string; displayName: string; count: number }>> => {
     return listCategoryCounts(type)
 }
 

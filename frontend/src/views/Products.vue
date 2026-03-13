@@ -18,7 +18,7 @@
           :class="{ active: selectedCategory === entry.category }"
           @click="goCategory(entry.category)"
         >
-          {{ entry.category }} ({{ entry.count }})
+          {{ entry.displayName || entry.category }} ({{ entry.count }})
         </li>
       </ul>
     </aside>

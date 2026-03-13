@@ -23,7 +23,7 @@ export const getProducts = async (params: {
 
 export const getCategoryCounts = async (
     type?: string,
-): Promise<Array<{ category: string; displayName: string; count: number }>> => {
+): Promise<Array<{ category: string; displayName: string; count: number; type: string }>> => {
     return listCategoryCounts(type)
 }
 

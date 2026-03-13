@@ -8,6 +8,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS product_category_display (
     category TEXT PRIMARY KEY,
     display_name TEXT NOT NULL,
+    type TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -16,18 +17,22 @@ CREATE TABLE IF NOT EXISTS product_category_display (
 ALTER TABLE product_category_display
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
+ALTER TABLE product_category_display
+ADD COLUMN IF NOT EXISTS type TEXT;
+
 -- Human-friendly category labels.
-INSERT INTO product_category_display (category, display_name)
+INSERT INTO product_category_display (category, display_name, type)
 VALUES
-    ('synth', 'Synthesizers'),
-    ('drum-machine', 'Drum Machines'),
-    ('sampler', 'Samplers'),
-    ('sound-module', 'Sound Modules'),
-    ('midi-interface', 'MIDI Interfaces'),
-    ('sound-card', 'Sound Cards')
+    ('synth', 'Synthesizers', 'instrument'),
+    ('drum-machine', 'Drum Machines', 'instrument'),
+    ('sampler', 'Samplers', 'instrument'),
+    ('sound-module', 'Sound Modules', 'instrument'),
+    ('midi-interface', 'MIDI Interfaces', 'accessory'),
+    ('sound-card', 'Sound Cards', 'accessory')
 ON CONFLICT (category)
 DO UPDATE SET
     display_name = EXCLUDED.display_name,
+    type = EXCLUDED.type,
     updated_at = NOW();
 
 -- Retro catalog seed.

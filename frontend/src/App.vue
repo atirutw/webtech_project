@@ -1,16 +1,5 @@
 <template>
-  <div
-    id="app"
-    :style="{
-      background: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url(${bg})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
-      minHeight: '100vh',
-      paddingTop: '70px'
-    }"
-  >
+  <div id="app" class="app-root">
     <Navbar />
     <router-view />
   </div>
@@ -22,7 +11,6 @@ import { onMounted } from 'vue'
 import Navbar from './components/Navbar.vue'
 import { useAuthStore } from './stores/auth'
 import { useCartStore } from './stores/cart'
-import bg from './assets/music.jpg'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
@@ -35,8 +23,8 @@ onMounted(async () => {
 </script>
 
 <style>
-html, body {
-  margin: 0;
-  padding: 0;
+.app-root {
+  min-height: 100vh;
+  padding-top: 76px;
 }
 </style>

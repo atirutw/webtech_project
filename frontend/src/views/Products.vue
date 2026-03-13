@@ -1,112 +1,94 @@
 <template>
-  <div class="layout">
-
-    <!-- SIDEBAR -->
+  <div class="products-page page-shell">
     <aside class="sidebar">
-      <h3>หมวดหมู่</h3>
+      <div class="sidebar-head">
+        <h3>หมวดหมู่</h3>
+      </div>
       <ul>
-        <li
-          :class="{ active: selectedCategory === 'all' }"
-          @click="goCategory('all')"
-        >
-          ทั้งหมด ({{ totalItems }})
-        </li>
-
-        <li
-          v-for="entry in categoryItems"
-          :key="entry.category"
-          :class="{ active: selectedCategory === entry.category }"
-          @click="goCategory(entry.category)"
-        >
-          {{ entry.displayName || entry.category }} ({{ entry.count }})
+        <li :class="{ active: selectedFacet === 'all' }" @click="goAllProducts()">
+          ทั้งหมด ({{ catalogTotalCount }})
         </li>
       </ul>
+
+      <template v-for="group in groupedCategories" :key="group.type">
+        <div class="group-title">{{ group.label }} ({{ group.count }})</div>
+        <ul>
+          <li
+            :class="{ active: selectedFacet === `type:${group.type}` }"
+            @click="goType(group.type)"
+          >
+            ทั้งหมด{{ group.label }} ({{ group.count }})
+          </li>
+
+          <li
+            v-for="entry in group.items"
+            :key="entry.category"
+            :class="{ active: selectedFacet === `category:${entry.category}` }"
+            @click="goCategory(entry.category)"
+          >
+            {{ entry.displayName || entry.category }} ({{ entry.count }})
+          </li>
+        </ul>
+      </template>
     </aside>
 
-    <!-- CONTENT -->
-    <div class="content">
+    <section class="content">
+      <header class="content-head">
+        <h1>{{ pageTitle }}</h1>
+        <p>{{ totalItems }} รายการ</p>
+      </header>
 
-      <h1>{{ pageTitle }}</h1>
-
-      <!-- FILTER BAR -->
       <div class="top-bar">
-
-        <!-- Search -->
         <input
-          type="text"
           v-model="searchText"
+          type="text"
+          class="market-input search-input"
           placeholder="ค้นหาสินค้า..."
         />
 
-        <!-- Sort -->
-        <select v-model="sortOption">
+        <select v-model="sortOption" class="market-select">
           <option value="default">เรียงตามปกติ</option>
           <option value="lowToHigh">ราคาต่ำ → สูง</option>
           <option value="highToLow">ราคาสูง → ต่ำ</option>
         </select>
-
-        <select v-model="selectedType" @change="onTypeChange">
-          <option value="all">ทุกประเภท</option>
-          <option value="instrument">เครื่องดนตรี</option>
-          <option value="accessory">อุปกรณ์เสริม</option>
-        </select>
-
       </div>
 
-      <!-- PRODUCT GRID -->
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       <p v-if="isLoading" class="loading-message">กำลังโหลดสินค้า...</p>
-      <div class="grid">
-        <div
-          class="card"
-          v-for="product in paginatedProducts"
-          :key="product.id"
-        >
+
+      <div class="grid" v-if="!isLoading && paginatedProducts.length > 0">
+        <article class="card" v-for="product in paginatedProducts" :key="product.id">
           <img :src="product.image || fallbackImage" />
-          <h3>{{ product.name }}</h3>
-          <p class="brand">{{ product.brand }}</p>
-          <p class="price">{{ product.price.toLocaleString() }} บาท</p>
+          <div class="meta">
+            <h3>{{ product.name }}</h3>
+            <p class="brand">{{ product.brand }}</p>
+            <p class="price">{{ product.price.toLocaleString() }} บาท</p>
 
-          <button class="cart-btn" @click="addToCart(product)">
-            เพิ่มลงตะกร้า 🛒
-          </button>
-
-        </div>
+            <button class="market-btn-primary cart-btn" @click="addToCart(product)">
+              เพิ่มลงตะกร้า
+            </button>
+          </div>
+        </article>
       </div>
 
       <p v-if="!isLoading && paginatedProducts.length === 0" class="loading-message">
         ไม่พบสินค้า
       </p>
 
-      <!-- PAGINATION -->
       <div class="pagination" v-if="totalPages > 1">
-
-        <button
-          :disabled="currentPage === 1"
-          @click="currentPage--"
-        >
+        <button :disabled="currentPage === 1" @click="currentPage--">
           ◀
         </button>
 
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          :class="{ activePage: currentPage === page }"
-          @click="goToPage(page)"
-        >
+        <button v-for="page in totalPages" :key="page" :class="{ activePage: currentPage === page }" @click="goToPage(page)">
           {{ page }}
         </button>
 
-        <button
-          :disabled="currentPage === totalPages"
-          @click="currentPage++"
-        >
+        <button :disabled="currentPage === totalPages" @click="currentPage++">
           ▶
         </button>
-
       </div>
-
-    </div>
+    </section>
   </div>
 </template>
 
@@ -127,6 +109,7 @@ const searchText = ref('')
 const sortOption = ref('default')
 const selectedCategory = ref('all')
 const selectedType = ref('all')
+const selectedFacet = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 6
 const products = ref([])
@@ -136,7 +119,19 @@ const totalPages = ref(1)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const fallbackImage = '/src/assets/music.jpg'
+const categoryLabelByType = {
+  instrument: 'เครื่องดนตรี',
+  accessory: 'อุปกรณ์เสริม'
+}
+
 const pageTitle = computed(() => {
+  if (selectedCategory.value !== 'all') {
+    const match = categoryItems.value.find((item) => item.category === selectedCategory.value)
+    if (match) {
+      return `🎼 ${match.displayName || match.category}`
+    }
+  }
+
   if (selectedType.value === 'instrument') {
     return '🎸 เครื่องดนตรี'
   }
@@ -148,45 +143,81 @@ const pageTitle = computed(() => {
   return '🎼 สินค้าทั้งหมด'
 })
 
+const groupedCategories = computed(() => {
+  const groups = new Map()
+
+  for (const item of categoryItems.value) {
+    const type = item.type || 'instrument'
+    const existing = groups.get(type)
+
+    if (!existing) {
+      groups.set(type, {
+        type,
+        label: categoryLabelByType[type] || type,
+        count: 0,
+        items: []
+      })
+    }
+
+    const target = groups.get(type)
+    target.items.push(item)
+    target.count += item.count
+  }
+
+  return [...groups.values()]
+})
+
+const catalogTotalCount = computed(() => categoryItems.value.reduce((sum, item) => sum + item.count, 0))
+
 /* ================= CATEGORY ================= */
+
+const goAllProducts = () => {
+  selectedType.value = 'all'
+  selectedCategory.value = 'all'
+  selectedFacet.value = 'all'
+  currentPage.value = 1
+  router.push('/products')
+}
+
+const goType = (type) => {
+  selectedType.value = type
+  selectedCategory.value = 'all'
+  selectedFacet.value = `type:${type}`
+  currentPage.value = 1
+  router.push('/products')
+}
 
 const goCategory = (cat) => {
   selectedCategory.value = cat
+  selectedFacet.value = `category:${cat}`
+  const match = categoryItems.value.find((item) => item.category === cat)
+  selectedType.value = match?.type || 'all'
   currentPage.value = 1
 
-  if (cat === 'all') {
-    router.push('/products')
-  } else {
-    router.push(`/category/${cat}`)
-  }
+  router.push(`/category/${cat}`)
 }
 
 watch(() => route.params.categoryName, (val) => {
   selectedCategory.value = val || 'all'
+
+  if (val) {
+    selectedFacet.value = `category:${val}`
+  } else {
+    selectedFacet.value = selectedType.value === 'all' ? 'all' : `type:${selectedType.value}`
+  }
+
   currentPage.value = 1
 }, { immediate: true })
 
-const onTypeChange = () => {
-  selectedCategory.value = 'all'
-  currentPage.value = 1
-
-  if (route.params.categoryName) {
-    router.push('/products')
-  }
-}
-
 const fetchCategories = async () => {
-  const params = {}
-
-  if (selectedType.value !== 'all') {
-    params.type = selectedType.value
-  }
-
-  const response = await api.get('/products/categories', {
-    params
-  })
+  const response = await api.get('/products/categories')
 
   categoryItems.value = response.data.categories || []
+
+  if (selectedCategory.value !== 'all') {
+    const match = categoryItems.value.find((item) => item.category === selectedCategory.value)
+    selectedType.value = match?.type || 'all'
+  }
 }
 
 const fetchProducts = async () => {
@@ -229,7 +260,6 @@ const goToPage = (page) => {
 }
 
 watch([searchText, sortOption, selectedCategory, currentPage, selectedType], fetchProducts)
-watch(selectedType, fetchCategories)
 
 onMounted(async () => {
   await fetchCategories()
@@ -244,140 +274,226 @@ const addToCart = (product) => {
 </script>
 
 <style scoped>
-.layout {
+.products-page {
   display: flex;
-  color: white;
+  gap: 22px;
+  align-items: flex-start;
 }
 
-/* Sidebar */
 .sidebar {
-  width: 220px;
-  padding: 20px;
-  background: rgba(0,0,0,0.7);
+  width: 260px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  position: sticky;
+  top: 90px;
+  overflow: hidden;
+}
+
+.sidebar-head {
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 0;
+  padding: 12px;
+  margin: 0;
+}
+
+.group-title {
+  margin: 6px 14px 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .sidebar li {
-  padding: 8px;
+  padding: 10px 12px;
   cursor: pointer;
-  margin-bottom: 6px;
-  border-radius: 6px;
-  transition: 0.2s;
+  margin-bottom: 4px;
+  border-radius: 10px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
 .sidebar li:hover {
-  background: rgba(255,255,255,0.1);
+  background: #f9fafb;
+  color: var(--text-primary);
 }
 
 .sidebar li.active {
-  background: #ffc107;
-  color: black;
+  background: #fff7ed;
+  color: #9a3412;
 }
 
-/* Content */
 .content {
   flex: 1;
-  padding: 40px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  padding: 20px;
+}
+
+.content-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.content-head h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+}
+
+.content-head p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
 .top-bar {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  min-width: 260px;
+  flex: 1;
 }
 
 .loading-message,
 .error-message {
-  margin: 8px 0 14px;
+  margin: 10px 2px 14px;
+  color: var(--text-secondary);
 }
 
 .error-message {
-  color: #ffb3b3;
+  color: #b91c1c;
 }
 
-input, select {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: none;
-}
-
-/* Grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
 }
 
 .card {
-  background: rgba(0,0,0,0.6);
-  padding: 15px;
-  border-radius: 10px;
-  text-align: center;
-  transition: 0.2s;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.14);
 }
 
 .card img {
   width: 100%;
-  height: 160px;
+  height: 180px;
   object-fit: cover;
-  border-radius: 6px;
+}
+
+.meta {
+  padding: 12px;
+}
+
+.meta h3 {
+  margin: 0 0 4px;
+  line-height: 1.25;
+  font-size: 1.02rem;
 }
 
 .price {
-  color: #ffc107;
-  font-weight: bold;
+  color: #c2410c;
+  font-weight: 800;
+  margin: 8px 0 0;
 }
 
-/* Cart Button */
 .cart-btn {
-  margin-top: 10px;
-  padding: 8px;
-  border: none;
-  background: #ffc107;
-  border-radius: 6px;
-  font-weight: bold;
+  width: 100%;
+  margin-top: 12px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.cart-btn:hover {
-  background: #ffca2c;
-}
-
-/* Pagination */
 .pagination {
-  margin-top: 30px;
+  margin-top: 22px;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .pagination button {
-  padding: 6px 12px;
-  border: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
   cursor: pointer;
-  border-radius: 5px;
-  background: rgba(255,255,255,0.1);
-  color: white;
-  transition: 0.2s;
+  border-radius: 8px;
+  background: var(--bg-surface-soft);
+  color: var(--text-primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .pagination button:hover {
-  background: #ffc107;
-  color: black;
+  background: #fff7ed;
+  color: #9a3412;
 }
 
 .activePage {
-  background: #ffc107 !important;
-  color: black;
-  font-weight: bold;
+  background: var(--accent) !important;
+  color: #111827 !important;
+  border-color: #f59e0b !important;
+  font-weight: 700;
+}
+
+.brand {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 1080px) {
+  .products-page {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 14px;
+  }
+
+  .content-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .search-input {
+    min-width: 100%;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page page-shell">
 
     <!-- Header Section -->
     <div class="header">
@@ -7,7 +7,7 @@
 
       <div class="filter-box">
         <label>เลือกแบรนด์:</label>
-        <select v-model="selectedBrand">
+        <select v-model="selectedBrand" class="market-select">
           <option value="">ทั้งหมด</option>
           <option v-for="brand in brands" :key="brand" :value="brand">
             {{ brand }}
@@ -35,7 +35,7 @@
           <p class="brand">{{ item.brand }}</p>
           <p class="price">{{ item.price }} บาท</p>
 
-          <button @click="addToCart(item)">
+          <button class="market-btn-primary" @click="addToCart(item)">
             เพิ่มลงตะกร้า
           </button>
         </div>
@@ -108,9 +108,11 @@ onMounted(fetchAccessories)
 <style scoped>
 
 .page {
-  padding: 40px 80px;
+  position: relative;
+  padding-top: 20px;
+  padding-bottom: 30px;
   min-height: 100vh;
-  color: white;
+  color: var(--text-primary);
 }
 
 /* เพิ่ม glow effect แบบหน้าแรก */
@@ -144,49 +146,50 @@ onMounted(fetchAccessories)
   z-index: 1;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .header h1 {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  font-weight: 700;
+  margin: 0;
 }
 
 .filter-box {
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
-select {
-  padding: 8px 15px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  font-weight: 500;
-}
-
-/* ===== Grid ===== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
 }
 
-/* ===== Card ===== */
 .card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(15px);
-  border-radius: 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   overflow: hidden;
-  transition: 0.4s;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  box-shadow: var(--shadow-card);
 }
 
 .card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 26px rgba(17, 24, 39, 0.14);
 }
 
-/* Image */
 .image-box {
-  height: 200px;
+  height: 170px;
   overflow: hidden;
 }
 
@@ -198,49 +201,55 @@ select {
 }
 
 .card:hover img {
-  transform: scale(1.1);
+  transform: scale(1.04);
 }
 
-/* Info */
 .info {
-  padding: 20px;
+  padding: 12px;
+}
+
+.info h3 {
+  margin: 0;
+  font-size: 1.05rem;
 }
 
 .brand {
-  font-size: 14px;
-  opacity: 0.7;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
   margin: 5px 0;
 }
 
 .price {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 800;
   margin: 10px 0;
-  color: #ffc107;
+  color: #c2410c;
 }
 
-/* Button */
 button {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  background: linear-gradient(45deg, #ffc107, #ff9800);
-  transition: 0.3s;
 }
 
-button:hover {
-  transform: scale(1.05);
-}
-
-/* Empty */
 .empty {
-  margin-top: 60px;
+  margin-top: 50px;
   text-align: center;
-  opacity: 0.6;
-  font-size: 18px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-box {
+    width: 100%;
+  }
+
+  .filter-box select {
+    width: 100%;
+  }
 }
 
 </style>

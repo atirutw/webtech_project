@@ -120,7 +120,7 @@ export const listProducts = async (
 
 export const listCategoryCounts = async (
     type?: string,
-): Promise<Array<{ category: string; displayName: string; count: number }>> => {
+): Promise<Array<{ category: string; displayName: string; count: number; type: string }>> => {
     const values: string[] = []
     const whereSql = type
         ? (() => {
@@ -129,18 +129,19 @@ export const listCategoryCounts = async (
         })()
         : ''
 
-    const result = await pool.query<{ category: string; display_name: string | null; count: string }>(
+    const result = await pool.query<{ category: string; display_name: string | null; count: string; type: string | null }>(
         `
         SELECT
             p.category,
             m.display_name,
+            COALESCE(m.type, p.type) AS type,
             COUNT(*)::text AS count
         FROM products AS p
         LEFT JOIN product_category_display AS m
             ON m.category = p.category
         ${whereSql}
-        GROUP BY p.category, m.display_name
-        ORDER BY p.category ASC
+        GROUP BY p.category, m.display_name, COALESCE(m.type, p.type)
+        ORDER BY COALESCE(m.type, p.type) ASC, p.category ASC
         `,
         values,
     )
@@ -155,6 +156,7 @@ export const listCategoryCounts = async (
                 .map((chunk) => `${chunk[0]?.toUpperCase() ?? ''}${chunk.slice(1)}`)
                 .join(' '),
         count: Number(row.count),
+        type: row.type ?? 'instrument',
     }))
 }
 

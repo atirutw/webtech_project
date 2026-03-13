@@ -92,33 +92,43 @@ const handleLogout = async () => {
 
 <style scoped>
 .glass-nav {
-  min-height: 72px;
-  background: rgba(10, 10, 20, 0.5);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  transition: all 0.3s ease;
+  min-height: 76px;
+  background: var(--bg-nav);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-nav.scrolled {
-  background: rgba(10, 10, 20, 0.9);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  background: rgba(19, 25, 33, 0.95);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.22);
 }
 
 .navbar-brand {
-  letter-spacing: 1px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  font-size: 1.45rem;
 }
 
 .nav-link {
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.84);
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 10px;
 }
 
 .nav-link:hover,
 .nav-link.router-link-active {
-  color: #ffc107;
+  color: #fff;
+  background: rgba(245, 158, 11, 0.22);
 }
 
 .offcanvas {
   max-width: 320px;
+}
+
+@media (max-width: 991px) {
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
 }
 </style>

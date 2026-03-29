@@ -32,6 +32,7 @@ const initStatements = [
     CREATE TABLE IF NOT EXISTS product_category_display (
         category TEXT PRIMARY KEY,
         display_name TEXT NOT NULL,
+        type TEXT,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
@@ -39,6 +40,10 @@ const initStatements = [
     `
     ALTER TABLE product_category_display
     ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    `,
+    `
+    ALTER TABLE product_category_display
+    ADD COLUMN IF NOT EXISTS type TEXT
     `,
     `
     CREATE TABLE IF NOT EXISTS cart_items (

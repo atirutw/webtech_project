@@ -6,6 +6,8 @@ import {
     deleteProductController,
     getProductController,
     listProductsController,
+    productRecommendationsController,
+    trendingProductsController,
     updateProductController,
 } from '../controllers/product.controller'
 import { requireAdmin, requireAuth } from '../middleware/auth-guard'
@@ -14,6 +16,8 @@ export const productRouter = Router()
 
 productRouter.get('/', listProductsController)
 productRouter.get('/categories', categoryCountsController)
+productRouter.get('/trending', trendingProductsController)
+productRouter.get('/:id/recommendations', productRecommendationsController)
 productRouter.get('/:id', getProductController)
 
 productRouter.post('/', requireAuth, requireAdmin, createProductController)

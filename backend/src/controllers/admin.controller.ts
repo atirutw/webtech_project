@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express'
 import { z } from 'zod'
 
-import { deleteUserAsAdmin, getUsersAsAdmin, updateUserAsAdmin } from '../services/admin.service'
+import { deleteUserAsAdmin, getAdminDashboard, getUsersAsAdmin, updateUserAsAdmin } from '../services/admin.service'
 import { HttpError } from '../utils/http-error'
 
 const userIdSchema = z.object({
@@ -17,6 +17,10 @@ const updateUserSchema = z
     .refine((payload) => Object.keys(payload).length > 0, {
         message: 'At least one field is required',
     })
+
+const dashboardQuerySchema = z.object({
+    days: z.coerce.number().int().min(3).max(30).optional(),
+})
 
 export const listUsersController: RequestHandler = async (_req, res, next) => {
     try {
@@ -56,6 +60,17 @@ export const deleteUserController: RequestHandler = async (req, res, next) => {
         await deleteUserAsAdmin(actingUser.id, params.id)
 
         res.status(204).send()
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const getDashboardController: RequestHandler = async (req, res, next) => {
+    try {
+        const query = dashboardQuerySchema.parse(req.query)
+        const dashboard = await getAdminDashboard(query.days ?? 7)
+
+        res.status(200).json({ dashboard })
     } catch (error) {
         next(error)
     }

@@ -3,6 +3,7 @@ import {
     countAdmins,
     deleteUserById,
     findUserById,
+    getAdminDashboardSnapshot,
     listUsers,
     updateUserByAdmin,
 } from '../repositories/admin.repository'
@@ -80,4 +81,8 @@ export const deleteUserAsAdmin = async (actingUserId: number, targetUserId: numb
     if (!deleted) {
         throw new HttpError(404, 'User not found')
     }
+}
+
+export const getAdminDashboard = async (days: number) => {
+    return getAdminDashboardSnapshot(days)
 }

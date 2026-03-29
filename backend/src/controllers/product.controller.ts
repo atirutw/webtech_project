@@ -7,6 +7,8 @@ import {
     getCategoryCounts,
     getProductById,
     getProducts,
+    getRecommendedProductsForProduct,
+    getTrendingProducts,
     updateProductAsAdmin,
 } from '../services/product.service'
 
@@ -50,6 +52,14 @@ const updateProductBodySchema = z
 
 const idParamSchema = z.object({
     id: z.coerce.number().int().positive(),
+})
+
+const recommendationQuerySchema = z.object({
+    limit: z.coerce.number().int().positive().max(12).optional(),
+})
+
+const trendingQuerySchema = z.object({
+    limit: z.coerce.number().int().positive().max(12).optional(),
 })
 
 export const listProductsController: RequestHandler = async (req, res, next) => {
@@ -122,6 +132,29 @@ export const deleteProductController: RequestHandler = async (req, res, next) =>
         await deleteProductAsAdmin(params.id)
 
         res.status(204).send()
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const productRecommendationsController: RequestHandler = async (req, res, next) => {
+    try {
+        const params = idParamSchema.parse(req.params)
+        const query = recommendationQuerySchema.parse(req.query)
+        const recommendations = await getRecommendedProductsForProduct(params.id, query.limit ?? 6)
+
+        res.status(200).json({ recommendations })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const trendingProductsController: RequestHandler = async (req, res, next) => {
+    try {
+        const query = trendingQuerySchema.parse(req.query)
+        const products = await getTrendingProducts(query.limit ?? 6)
+
+        res.status(200).json({ products })
     } catch (error) {
         next(error)
     }

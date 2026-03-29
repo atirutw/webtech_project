@@ -1,7 +1,13 @@
 import { RequestHandler } from 'express'
 import { z } from 'zod'
 
-import { getOrderDetailAsAdmin, getMyOrderDetail, listMyOrders, listOrdersByUserAsAdmin } from '../services/order.service'
+import {
+    getOrderDetailAsAdmin,
+    getMyOrderDetail,
+    listMyOrders,
+    listOrdersByUserAsAdmin,
+    reorderMyOrder,
+} from '../services/order.service'
 import { HttpError } from '../utils/http-error'
 
 const userIdParamsSchema = z.object({
@@ -62,6 +68,18 @@ export const getOrderDetailAsAdminController: RequestHandler = async (req, res, 
         const order = await getOrderDetailAsAdmin(params.orderId)
 
         res.status(200).json({ order })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const reorderMyOrderController: RequestHandler = async (req, res, next) => {
+    try {
+        const userId = getAuthUserId(req)
+        const params = orderIdParamsSchema.parse(req.params)
+        const cart = await reorderMyOrder(userId, params.orderId)
+
+        res.status(200).json(cart)
     } catch (error) {
         next(error)
     }

@@ -3,8 +3,12 @@ import {
     createProduct,
     deleteProductById,
     findProductById,
+    listRecommendedProducts,
     listCategoryCounts,
     listProducts,
+    listTrendingProducts,
+    RecommendedProduct,
+    TrendingProduct,
     updateProduct,
 } from '../repositories/product.repository'
 import { HttpError } from '../utils/http-error'
@@ -84,4 +88,18 @@ export const getProductById = async (id: number): Promise<Product> => {
     }
 
     return product
+}
+
+export const getRecommendedProductsForProduct = async (productId: number, limit: number): Promise<RecommendedProduct[]> => {
+    const product = await findProductById(productId)
+
+    if (!product) {
+        throw new HttpError(404, 'Product not found')
+    }
+
+    return listRecommendedProducts(productId, limit)
+}
+
+export const getTrendingProducts = async (limit: number): Promise<TrendingProduct[]> => {
+    return listTrendingProducts(limit)
 }

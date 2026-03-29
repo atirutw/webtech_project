@@ -24,6 +24,17 @@ export type Product = {
     createdAt: string
 }
 
+export type RecommendedProduct = {
+    item: Product
+    score: number
+    coPurchaseCount: number
+}
+
+export type TrendingProduct = {
+    item: Product
+    soldCount: number
+}
+
 const toProduct = (row: ProductRow): Product => ({
     id: row.id,
     name: row.name,
@@ -293,4 +304,107 @@ export const updateProduct = async (
 export const deleteProductById = async (id: number): Promise<boolean> => {
     const result = await pool.query('DELETE FROM products WHERE id = $1', [id])
     return (result.rowCount ?? 0) > 0
+}
+
+type RecommendedProductRow = ProductRow & {
+    score: string
+    co_purchase_count: string
+}
+
+export const listRecommendedProducts = async (productId: number, limit: number): Promise<RecommendedProduct[]> => {
+    const safeLimit = Math.max(1, Math.min(12, limit))
+
+    const result = await pool.query<RecommendedProductRow>(
+        `
+        WITH target AS (
+            SELECT id, category, type, brand, price
+            FROM products
+            WHERE id = $1
+            LIMIT 1
+        ),
+        co_purchase AS (
+            SELECT
+                oi2.product_id,
+                COUNT(*)::text AS co_purchase_count
+            FROM order_items oi1
+            JOIN order_items oi2
+                ON oi2.order_id = oi1.order_id
+               AND oi2.product_id <> oi1.product_id
+            WHERE oi1.product_id = $1
+            GROUP BY oi2.product_id
+        )
+        SELECT
+            p.id,
+            p.name,
+            p.brand,
+            p.category,
+            p.type,
+            p.price::text,
+            p.image_url,
+            p.stock,
+            p.created_at,
+            (
+                CASE WHEN p.category = t.category THEN 3 ELSE 0 END +
+                CASE WHEN p.type = t.type THEN 2 ELSE 0 END +
+                CASE WHEN p.brand IS NOT NULL AND t.brand IS NOT NULL AND p.brand = t.brand THEN 2 ELSE 0 END +
+                CASE
+                    WHEN t.price > 0 AND ABS(p.price - t.price) / t.price <= 0.20 THEN 2
+                    WHEN t.price > 0 AND ABS(p.price - t.price) / t.price <= 0.40 THEN 1
+                    ELSE 0
+                END +
+                CASE WHEN p.stock > 0 THEN 1 ELSE 0 END +
+                COALESCE(cp.co_purchase_count::int, 0)
+            )::text AS score,
+            COALESCE(cp.co_purchase_count, '0') AS co_purchase_count
+        FROM products p
+        CROSS JOIN target t
+        LEFT JOIN co_purchase cp ON cp.product_id = p.id
+        WHERE p.id <> t.id
+        ORDER BY score::int DESC, cp.co_purchase_count::int DESC, p.created_at DESC
+        LIMIT $2
+        `,
+        [productId, safeLimit],
+    )
+
+    return result.rows.map((row) => ({
+        item: toProduct(row),
+        score: Number(row.score),
+        coPurchaseCount: Number(row.co_purchase_count),
+    }))
+}
+
+type TrendingProductRow = ProductRow & {
+    sold_count: string
+}
+
+export const listTrendingProducts = async (limit: number): Promise<TrendingProduct[]> => {
+    const safeLimit = Math.max(1, Math.min(12, limit))
+
+    const result = await pool.query<TrendingProductRow>(
+        `
+        SELECT
+            p.id,
+            p.name,
+            p.brand,
+            p.category,
+            p.type,
+            p.price::text,
+            p.image_url,
+            p.stock,
+            p.created_at,
+            COALESCE(SUM(oi.quantity), 0)::text AS sold_count
+        FROM products p
+        LEFT JOIN order_items oi ON oi.product_id = p.id
+        LEFT JOIN orders o ON o.id = oi.order_id
+        GROUP BY p.id
+        ORDER BY COALESCE(SUM(oi.quantity), 0) DESC, p.stock DESC, p.created_at DESC
+        LIMIT $1
+        `,
+        [safeLimit],
+    )
+
+    return result.rows.map((row) => ({
+        item: toProduct(row),
+        soldCount: Number(row.sold_count),
+    }))
 }

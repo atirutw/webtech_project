@@ -30,10 +30,10 @@
           <div class="order-right">
             <p class="order-total">{{ order.totalAmount.toLocaleString() }} บาท</p>
             <span class="status-badge">{{ mapStatus(order.status) }}</span>
-            <button class="btn btn-outline-warning btn-sm" @click="reorder(order.id)">
+            <button class="market-btn market-btn-outline market-btn-sm order-action-btn" @click="reorder(order.id)">
               สั่งซ้ำ
             </button>
-            <router-link :to="`/orders/${order.id}`" class="btn btn-outline-secondary btn-sm">
+            <router-link :to="`/orders/${order.id}`" class="market-btn market-btn-outline market-btn-sm order-action-btn">
               ดูรายละเอียด
             </router-link>
           </div>
@@ -170,6 +170,27 @@ onMounted(async () => {
   gap: 10px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.order-action-btn {
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #7c2d12;
+  border-color: #f3d6a7;
+  background: #fffbeb;
+  box-shadow: none;
+}
+
+.order-action-btn:hover {
+  background: #fff1d6;
+  border-color: #eabf7a;
+  color: #7c2d12;
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .order-total {

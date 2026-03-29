@@ -34,12 +34,14 @@
           <p class="brand">{{ product.brand }}</p>
           <p class="price">{{ product.price.toLocaleString() }} บาท</p>
 
-          <button class="market-btn-primary cart-btn" @click="$emit('addToCart', product)">
-            เพิ่มลงตะกร้า
-          </button>
-          <router-link class="btn btn-outline-secondary btn-sm mt-2" :to="`/products/${product.id}`">
-            ดูรายละเอียด
-          </router-link>
+          <div class="meta-actions">
+            <button class="market-btn market-btn-primary card-action-btn" @click="$emit('addToCart', product)">
+              เพิ่มลงตะกร้า
+            </button>
+            <router-link class="market-btn market-btn-outline card-action-btn" :to="`/products/${product.id}`">
+              ดูรายละเอียด
+            </router-link>
+          </div>
         </div>
       </article>
     </div>
@@ -123,3 +125,17 @@ defineEmits([
   'changePage'
 ])
 </script>
+
+<style scoped>
+.meta-actions {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.card-action-btn {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+}
+</style>

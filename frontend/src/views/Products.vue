@@ -385,12 +385,6 @@ const addToCart = (product) => {
   margin: 8px 0 0;
 }
 
-.cart-btn {
-  width: 100%;
-  margin-top: 12px;
-  cursor: pointer;
-}
-
 .pagination {
   margin-top: 22px;
   display: flex;

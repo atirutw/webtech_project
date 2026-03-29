@@ -1,4 +1,5 @@
 import { pool } from '../db/pool'
+import { resolveMediaUrl } from '../utils/media'
 
 type UserRow = {
     id: number
@@ -6,6 +7,7 @@ type UserRow = {
     email: string
     password_hash: string
     role: string
+    avatar_url: string | null
     created_at: Date
 }
 
@@ -14,6 +16,7 @@ export type PublicUser = {
     name: string
     email: string
     role: string
+    avatar: string
     createdAt: string
 }
 
@@ -22,6 +25,7 @@ const toPublicUser = (row: UserRow): PublicUser => ({
     name: row.name,
     email: row.email,
     role: row.role,
+    avatar: resolveMediaUrl(row.avatar_url),
     createdAt: row.created_at.toISOString(),
 })
 
@@ -35,7 +39,7 @@ export const createUser = async (params: {
         `
         INSERT INTO users (name, email, password_hash, role)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, name, email, password_hash, role, created_at
+        RETURNING id, name, email, password_hash, role, avatar_url, created_at
         `,
         [params.name, params.email, params.passwordHash, params.role],
     )
@@ -52,7 +56,7 @@ export const createUser = async (params: {
 export const findUserWithPasswordByEmail = async (email: string): Promise<UserRow | null> => {
     const result = await pool.query<UserRow>(
         `
-        SELECT id, name, email, password_hash, role, created_at
+        SELECT id, name, email, password_hash, role, avatar_url, created_at
         FROM users
         WHERE email = $1
         LIMIT 1
@@ -66,7 +70,7 @@ export const findUserWithPasswordByEmail = async (email: string): Promise<UserRo
 export const findUserWithPasswordById = async (id: number): Promise<UserRow | null> => {
     const result = await pool.query<UserRow>(
         `
-        SELECT id, name, email, password_hash, role, created_at
+        SELECT id, name, email, password_hash, role, avatar_url, created_at
         FROM users
         WHERE id = $1
         LIMIT 1
@@ -80,7 +84,7 @@ export const findUserWithPasswordById = async (id: number): Promise<UserRow | nu
 export const findPublicUserByEmail = async (email: string): Promise<PublicUser | null> => {
     const result = await pool.query<UserRow>(
         `
-        SELECT id, name, email, password_hash, role, created_at
+        SELECT id, name, email, password_hash, role, avatar_url, created_at
         FROM users
         WHERE email = $1
         LIMIT 1
@@ -100,7 +104,7 @@ export const findPublicUserByEmail = async (email: string): Promise<PublicUser |
 export const findPublicUserByTokenHash = async (tokenHash: string): Promise<PublicUser | null> => {
     const result = await pool.query<UserRow>(
         `
-        SELECT u.id, u.name, u.email, u.password_hash, u.role, u.created_at
+        SELECT u.id, u.name, u.email, u.password_hash, u.role, u.avatar_url, u.created_at
         FROM auth_tokens t
         JOIN users u ON u.id = t.user_id
         WHERE t.token_hash = $1
@@ -125,6 +129,7 @@ export const updateUser = async (
         name?: string | undefined
         email?: string | undefined
         passwordHash?: string | undefined
+        avatarPath?: string | undefined
     },
 ): Promise<PublicUser | null> => {
     const updates: string[] = []
@@ -145,6 +150,11 @@ export const updateUser = async (
         updates.push(`password_hash = $${values.length}`)
     }
 
+    if (params.avatarPath !== undefined) {
+        values.push(params.avatarPath)
+        updates.push(`avatar_url = $${values.length}`)
+    }
+
     if (updates.length === 0) {
         const existing = await findUserWithPasswordById(id)
         return existing ? toPublicUser(existing) : null
@@ -157,7 +167,7 @@ export const updateUser = async (
         UPDATE users
         SET ${updates.join(', ')}
         WHERE id = $${values.length}
-        RETURNING id, name, email, password_hash, role, created_at
+        RETURNING id, name, email, password_hash, role, avatar_url, created_at
         `,
         values,
     )

@@ -55,6 +55,13 @@ const html = `<!DOCTYPE html>
     </div>
 
     <div class="card">
+      <p><span class="method">POST</span> <code>/auth/me/avatar</code></p>
+      <p>Upload and set the authenticated user profile image.</p>
+      <p>Parameters: Header <code>Authorization: Bearer &lt;token&gt;</code>, form-data <code>file</code> (image)</p>
+      <p>Returns: <code>{ user, avatar: { path, url, mimeType, size } }</code></p>
+    </div>
+
+    <div class="card">
       <p><span class="method">POST</span> <code>/auth/logout</code></p>
       <p>Invalidate current token.</p>
       <p>Parameters: Header <code>Authorization: Bearer &lt;token&gt;</code></p>

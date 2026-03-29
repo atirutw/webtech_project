@@ -97,6 +97,23 @@ export const useAuthStore = defineStore('auth', {
             return response.data
         },
 
+        async uploadAvatar(file) {
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const response = await api.post('/auth/me/avatar', formData, {
+                headers: {
+                    ...this.authHeaders(),
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+
+            this.user = normalizeUser(response.data.user)
+            localStorage.setItem(USER_KEY, JSON.stringify(this.user))
+
+            return response.data
+        },
+
         async login(payload) {
             const response = await api.post('/auth/login', payload)
             this.setSession(response.data)

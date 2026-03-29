@@ -45,7 +45,8 @@
 
           <template v-if="auth.isAuthenticated">
             <router-link to="/profile" class="profile-link">
-              <span class="avatar-badge">{{ userInitials }}</span>
+              <img v-if="auth.user?.avatar" :src="auth.user.avatar" alt="Profile avatar" class="avatar-image" />
+              <span v-else class="avatar-badge">{{ userInitials }}</span>
               <span class="profile-name">{{ auth.user?.name }}</span>
             </router-link>
             <button class="btn signout-btn" @click="handleLogout">ออกจากระบบ</button>
@@ -314,6 +315,14 @@ const handleLogout = async () => {
   color: #9a3412;
   font-weight: 700;
   font-size: 0.76rem;
+}
+
+.avatar-image {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
 }
 
 .profile-name {

@@ -3,6 +3,31 @@
     <div class="profile-card card border-0 shadow-lg p-4">
       <h1 class="h3 mb-4">แก้ไขข้อมูลผู้ใช้</h1>
 
+      <div class="avatar-section mb-4">
+        <img v-if="avatarPreviewUrl" :src="avatarPreviewUrl" alt="Profile avatar" class="avatar-preview" />
+        <div v-else class="avatar-fallback">{{ userInitials }}</div>
+
+        <div class="avatar-controls">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            :disabled="isUploadingAvatar || isSubmitting"
+            @click="openAvatarPicker"
+          >
+            {{ isUploadingAvatar ? 'กำลังอัปโหลด...' : 'เลือกรูปโปรไฟล์' }}
+          </button>
+          <input
+            id="avatar-upload"
+            ref="avatarInput"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/*"
+            class="d-none"
+            @change="handleAvatarSelected"
+          />
+          <p class="avatar-hint mb-0">รองรับ JPG, PNG, WEBP ขนาดไม่เกิน 2MB</p>
+        </div>
+      </div>
+
       <form @submit.prevent="handleProfileUpdate" class="d-grid gap-3">
         <div>
           <label class="form-label">ชื่อ</label>
@@ -58,9 +83,25 @@ const email = ref('')
 const currentPassword = ref('')
 const newPassword = ref('')
 const isSubmitting = ref(false)
+const isUploadingAvatar = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const avatarInput = ref(null)
+const avatarPreviewUrl = ref('')
 const requiresCurrentPassword = computed(() => Boolean(newPassword.value) && !currentPassword.value)
+const userInitials = computed(() => {
+  const rawName = name.value?.trim() || authStore.user?.name?.trim() || ''
+
+  if (!rawName) {
+    return 'U'
+  }
+
+  return rawName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((chunk) => chunk[0]?.toUpperCase() ?? '')
+    .join('')
+})
 
 onMounted(() => {
   if (!authStore.isAuthenticated) {
@@ -70,7 +111,48 @@ onMounted(() => {
 
   name.value = authStore.user?.name || ''
   email.value = authStore.user?.email || ''
+  avatarPreviewUrl.value = authStore.user?.avatar || ''
 })
+
+const openAvatarPicker = () => {
+  avatarInput.value?.click()
+}
+
+const handleAvatarSelected = async (event) => {
+  const target = event.target
+  const file = target.files?.[0]
+
+  if (!file) {
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    errorMessage.value = 'กรุณาเลือกไฟล์รูปภาพเท่านั้น'
+    target.value = ''
+    return
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    errorMessage.value = 'รูปภาพต้องมีขนาดไม่เกิน 2MB'
+    target.value = ''
+    return
+  }
+
+  errorMessage.value = ''
+  successMessage.value = ''
+  isUploadingAvatar.value = true
+
+  try {
+    const response = await authStore.uploadAvatar(file)
+    avatarPreviewUrl.value = response.user?.avatar || ''
+    successMessage.value = 'อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว'
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.message || 'อัปเดตรูปโปรไฟล์ไม่สำเร็จ'
+  } finally {
+    isUploadingAvatar.value = false
+    target.value = ''
+  }
+}
 
 const handleProfileUpdate = async () => {
   errorMessage.value = ''
@@ -114,5 +196,44 @@ const handleProfileUpdate = async () => {
   border: 1px solid var(--border);
   color: var(--text-primary);
   border-radius: 16px;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar-preview,
+.avatar-fallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.avatar-preview {
+  object-fit: cover;
+}
+
+.avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent), transparent 74%);
+  color: #9a3412;
+}
+
+.avatar-controls {
+  min-width: 0;
+}
+
+.avatar-hint {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
 }
 </style>

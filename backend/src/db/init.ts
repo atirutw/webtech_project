@@ -16,6 +16,10 @@ const initStatements = [
     ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'customer'
     `,
     `
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS avatar_url TEXT
+    `,
+    `
     CREATE TABLE IF NOT EXISTS products (
         id BIGSERIAL PRIMARY KEY,
         name TEXT NOT NULL,

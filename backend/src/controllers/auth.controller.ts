@@ -1,7 +1,8 @@
 import { RequestHandler } from 'express'
 import { z } from 'zod'
 
-import { getMe, login, logout, register, updateMe } from '../services/auth.service'
+import { getMe, login, logout, register, updateMe, updateMyAvatar } from '../services/auth.service'
+import { resolveMediaUrl } from '../utils/media'
 import { HttpError } from '../utils/http-error'
 
 const registerSchema = z.object({
@@ -92,6 +93,30 @@ export const updateMeController: RequestHandler = async (req, res, next) => {
         const response = await updateMe(token, payload)
 
         res.status(200).json({ user: response })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const updateAvatarController: RequestHandler = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            throw new HttpError(400, 'Avatar image is required')
+        }
+
+        const token = getBearerToken(req.header('authorization'))
+        const avatarPath = `/media/avatars/${req.file.filename}`
+        const response = await updateMyAvatar(token, avatarPath)
+
+        res.status(200).json({
+            user: response,
+            avatar: {
+                path: avatarPath,
+                url: resolveMediaUrl(avatarPath),
+                mimeType: req.file.mimetype,
+                size: req.file.size,
+            },
+        })
     } catch (error) {
         next(error)
     }

@@ -11,6 +11,7 @@ import {
 import { env } from '../config/env'
 import { generateToken, hashPassword, hashToken, verifyPassword } from '../utils/auth'
 import { HttpError } from '../utils/http-error'
+import { normalizeStoredMediaPath, resolveMediaUrl } from '../utils/media'
 
 type AuthPayload = {
     token: string
@@ -19,6 +20,7 @@ type AuthPayload = {
         name: string
         email: string
         role: string
+        avatar: string
         createdAt: string
     }
 }
@@ -110,6 +112,7 @@ export const login = async (params: { email: string; password: string }): Promis
             name: user.name,
             email: user.email,
             role: user.role,
+            avatar: resolveMediaUrl(user.avatar_url),
             createdAt: user.created_at.toISOString(),
         },
     }
@@ -138,6 +141,7 @@ export const updateMe = async (
         email?: string | undefined
         currentPassword?: string | undefined
         newPassword?: string | undefined
+        avatarPath?: string | undefined
     },
 ): Promise<AuthPayload['user']> => {
     const tokenHash = hashToken(token)
@@ -151,6 +155,7 @@ export const updateMe = async (
         name?: string | undefined
         email?: string | undefined
         passwordHash?: string | undefined
+        avatarPath?: string | undefined
     } = {}
 
     if (params.name !== undefined) {
@@ -187,6 +192,10 @@ export const updateMe = async (
         updates.passwordHash = hashPassword(params.newPassword)
     }
 
+    if (params.avatarPath !== undefined) {
+        updates.avatarPath = normalizeStoredMediaPath(params.avatarPath)
+    }
+
     const updatedUser = await updateUser(currentUser.id, updates)
 
     if (!updatedUser) {
@@ -194,4 +203,14 @@ export const updateMe = async (
     }
 
     return updatedUser
+}
+
+export const updateMyAvatar = async (token: string, avatarPath: string): Promise<AuthPayload['user']> => {
+    const normalizedAvatarPath = normalizeStoredMediaPath(avatarPath)
+
+    if (!normalizedAvatarPath.startsWith('/media/avatars/')) {
+        throw new HttpError(400, 'Invalid avatar path')
+    }
+
+    return updateMe(token, { avatarPath: normalizedAvatarPath })
 }

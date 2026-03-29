@@ -1,11 +1,10 @@
 <template>
   <div class="products-page page-shell">
     <ProductsSidebar
-      :selected-facet="selectedFacet"
+      :selected-category="selectedCategory"
       :catalog-total-count="catalogTotalCount"
-      :grouped-categories="groupedCategories"
+      :category-items="categoryItems"
       @all-products="goAllProducts"
-      @type-selected="goType"
       @category-selected="goCategory" />
 
     <ProductsContent
@@ -46,8 +45,6 @@ const cartStore = useCartStore()
 const searchText = ref('')
 const sortOption = ref('default')
 const selectedCategory = ref('all')
-const selectedType = ref('all')
-const selectedFacet = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 6
 const products = ref([])
@@ -57,25 +54,12 @@ const totalPages = ref(1)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const fallbackImage = '/src/assets/music.jpg'
-const categoryLabelByType = {
-  instrument: 'เครื่องดนตรี',
-  accessory: 'อุปกรณ์เสริม'
-}
-
 const pageTitle = computed(() => {
   if (selectedCategory.value !== 'all') {
     const match = categoryItems.value.find((item) => item.category === selectedCategory.value)
     if (match) {
       return match.displayName || match.category
     }
-  }
-
-  if (selectedType.value === 'instrument') {
-    return 'เครื่องดนตรี'
-  }
-
-  if (selectedType.value === 'accessory') {
-    return 'อุปกรณ์เสริม'
   }
 
   return 'สินค้าทั้งหมด'
@@ -86,39 +70,7 @@ const pageIconClass = computed(() => {
     return 'bi-tag'
   }
 
-  if (selectedType.value === 'instrument') {
-    return 'bi-music-note-beamed'
-  }
-
-  if (selectedType.value === 'accessory') {
-    return 'bi-headphones'
-  }
-
   return 'bi-grid-3x3-gap'
-})
-
-const groupedCategories = computed(() => {
-  const groups = new Map()
-
-  for (const item of categoryItems.value) {
-    const type = item.type || 'instrument'
-    const existing = groups.get(type)
-
-    if (!existing) {
-      groups.set(type, {
-        type,
-        label: categoryLabelByType[type] || type,
-        count: 0,
-        items: []
-      })
-    }
-
-    const target = groups.get(type)
-    target.items.push(item)
-    target.count += item.count
-  }
-
-  return [...groups.values()]
 })
 
 const catalogTotalCount = computed(() => categoryItems.value.reduce((sum, item) => sum + item.count, 0))
@@ -126,26 +78,13 @@ const catalogTotalCount = computed(() => categoryItems.value.reduce((sum, item) 
 /* ================= CATEGORY ================= */
 
 const goAllProducts = () => {
-  selectedType.value = 'all'
   selectedCategory.value = 'all'
-  selectedFacet.value = 'all'
-  currentPage.value = 1
-  router.push('/products')
-}
-
-const goType = (type) => {
-  selectedType.value = type
-  selectedCategory.value = 'all'
-  selectedFacet.value = `type:${type}`
   currentPage.value = 1
   router.push('/products')
 }
 
 const goCategory = (cat) => {
   selectedCategory.value = cat
-  selectedFacet.value = `category:${cat}`
-  const match = categoryItems.value.find((item) => item.category === cat)
-  selectedType.value = match?.type || 'all'
   currentPage.value = 1
 
   router.push(`/category/${cat}`)
@@ -154,12 +93,6 @@ const goCategory = (cat) => {
 watch(() => route.params.categoryName, (val) => {
   selectedCategory.value = val || 'all'
 
-  if (val) {
-    selectedFacet.value = `category:${val}`
-  } else {
-    selectedFacet.value = selectedType.value === 'all' ? 'all' : `type:${selectedType.value}`
-  }
-
   currentPage.value = 1
 }, { immediate: true })
 
@@ -167,11 +100,6 @@ const fetchCategories = async () => {
   const response = await api.get('/products/categories')
 
   categoryItems.value = response.data.categories || []
-
-  if (selectedCategory.value !== 'all') {
-    const match = categoryItems.value.find((item) => item.category === selectedCategory.value)
-    selectedType.value = match?.type || 'all'
-  }
 }
 
 const fetchProducts = async () => {
@@ -185,8 +113,7 @@ const fetchProducts = async () => {
         limit: itemsPerPage,
         category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
         search: searchText.value || undefined,
-        sort: sortOption.value,
-        type: selectedType.value === 'all' ? undefined : selectedType.value
+        sort: sortOption.value
       }
     })
 
@@ -213,7 +140,7 @@ const goToPage = (page) => {
   currentPage.value = page
 }
 
-watch([searchText, sortOption, selectedCategory, currentPage, selectedType], fetchProducts)
+watch([searchText, sortOption, selectedCategory, currentPage], fetchProducts)
 
 onMounted(async () => {
   await fetchCategories()

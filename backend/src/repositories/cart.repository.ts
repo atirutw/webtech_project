@@ -6,7 +6,6 @@ type CartRow = {
     product_id: number
     product_name: string
     product_brand: string | null
-    product_type: string
     product_category: string
     product_image: string | null
     product_price: string
@@ -19,7 +18,6 @@ export type CartItem = {
     productId: number
     name: string
     brand: string
-    type: string
     category: string
     image: string
     price: number
@@ -32,7 +30,6 @@ const toCartItem = (row: CartRow): CartItem => ({
     productId: row.product_id,
     name: row.product_name,
     brand: row.product_brand ?? '',
-    type: row.product_type,
     category: row.product_category,
     image: resolveMediaUrl(row.product_image),
     price: Number(row.product_price),
@@ -48,7 +45,6 @@ export const getCartItemsByUserId = async (userId: number): Promise<CartItem[]> 
             p.id AS product_id,
             p.name AS product_name,
             p.brand AS product_brand,
-            p.type AS product_type,
             p.category AS product_category,
             p.image_url AS product_image,
             p.price::text AS product_price,
@@ -73,7 +69,6 @@ export const getCartItemByIdForUser = async (cartItemId: number, userId: number)
             p.id AS product_id,
             p.name AS product_name,
             p.brand AS product_brand,
-            p.type AS product_type,
             p.category AS product_category,
             p.image_url AS product_image,
             p.price::text AS product_price,

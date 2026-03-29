@@ -24,14 +24,13 @@
         <ProductManagementSection
           v-show="activeSection === 'products'"
           :product-search="productSearch"
-          :product-type-filter="productTypeFilter"
           :product-form="productForm"
+          :category-options="createCategoryOptions"
           :is-submitting-product="isSubmittingProduct"
           :is-uploading-image="isUploadingCreateImage"
           :product-message="productMessage"
           :filtered-products="filteredProducts"
           @update-product-search="productSearch = $event"
-          @update-product-type-filter="productTypeFilter = $event"
           @upload-product-image="uploadProductImage($event, 'create')"
           @create-product="createProduct"
           @open-edit-product="openEditProduct"
@@ -53,6 +52,7 @@
     <EditProductModal
       :open="isEditModalOpen"
       :edit-form="editForm"
+      :category-options="editCategoryOptions"
       :is-saving-edit="isSavingEdit"
       :is-uploading-image="isUploadingEditImage"
       @close="closeEditModal"
@@ -85,6 +85,15 @@ import { useAuthStore } from '../stores/auth'
 const authStore = useAuthStore()
 const router = useRouter()
 
+const CATEGORY_OPTIONS = [
+  { value: 'synth', label: 'Synthesizers' },
+  { value: 'drum-machine', label: 'Drum Machines' },
+  { value: 'sampler', label: 'Samplers' },
+  { value: 'sound-module', label: 'Sound Modules' },
+  { value: 'midi-interface', label: 'MIDI Interfaces' },
+  { value: 'sound-card', label: 'Sound Cards' }
+]
+
 const currentUserId = computed(() => {
   const parsedId = Number(authStore.user?.id)
   return Number.isFinite(parsedId) ? parsedId : null
@@ -108,7 +117,6 @@ const userMessage = ref('')
 const activeSection = ref('dashboard')
 
 const productSearch = ref('')
-const productTypeFilter = ref('all')
 const userSearch = ref('')
 
 const isEditModalOpen = ref(false)
@@ -116,8 +124,7 @@ const editForm = ref({
   id: null,
   name: '',
   brand: '',
-  category: '',
-  type: 'instrument',
+  category: 'synth',
   price: 0,
   stock: 0,
   image: ''
@@ -133,8 +140,7 @@ const deleteDialog = ref({
 const productForm = ref({
   name: '',
   brand: '',
-  category: '',
-  type: 'instrument',
+  category: 'synth',
   price: '',
   stock: '',
   image: ''
@@ -143,6 +149,9 @@ const productForm = ref({
 const adminHeaders = () => ({
   headers: authStore.authHeaders()
 })
+
+const createCategoryOptions = computed(() => CATEGORY_OPTIONS)
+const editCategoryOptions = computed(() => CATEGORY_OPTIONS)
 
 const toMediaPath = (value) => {
   const raw = String(value || '').trim()
@@ -283,14 +292,12 @@ const filteredProducts = computed(() => {
   const keyword = productSearch.value.trim().toLowerCase()
 
   return products.value.filter((item) => {
-    const matchesType = productTypeFilter.value === 'all' || item.type === productTypeFilter.value
-
     if (!keyword) {
-      return matchesType
+      return true
     }
 
     const text = `${item.name} ${item.brand || ''} ${item.category || ''}`.toLowerCase()
-    return matchesType && text.includes(keyword)
+    return text.includes(keyword)
   })
 })
 
@@ -320,8 +327,7 @@ const createProduct = async () => {
     productForm.value = {
       name: '',
       brand: '',
-      category: '',
-      type: 'instrument',
+      category: 'synth',
       price: '',
       stock: '',
       image: ''
@@ -337,12 +343,15 @@ const createProduct = async () => {
 }
 
 const openEditProduct = (product) => {
+  const availableCategories = CATEGORY_OPTIONS.map((entry) => entry.value)
+
   editForm.value = {
     id: product.id,
     name: product.name,
     brand: product.brand || '',
-    category: product.category,
-    type: product.type,
+    category: availableCategories.includes(product.category)
+      ? product.category
+      : (availableCategories[0] || ''),
     price: product.price,
     stock: product.stock,
     image: toMediaPath(product.image || '')
@@ -365,7 +374,6 @@ const saveEditedProduct = async () => {
     await api.patch(`/products/${editForm.value.id}`, {
       name: editForm.value.name,
       category: editForm.value.category,
-      type: editForm.value.type,
       price: Number(editForm.value.price),
       stock: Number(editForm.value.stock),
       brand: editForm.value.brand,

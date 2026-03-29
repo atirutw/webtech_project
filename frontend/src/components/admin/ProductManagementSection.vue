@@ -11,14 +11,6 @@
         type="text"
         placeholder="ค้นหาสินค้า/แบรนด์/หมวดหมู่"
         @input="$emit('updateProductSearch', $event.target.value)" />
-      <select
-        :value="productTypeFilter"
-        class="form-select toolbar-select"
-        @change="$emit('updateProductTypeFilter', $event.target.value)">
-        <option value="all">ทุกประเภท</option>
-        <option value="instrument">เครื่องดนตรี</option>
-        <option value="accessory">อุปกรณ์เสริม</option>
-      </select>
     </div>
 
     <div class="form-grid">
@@ -34,14 +26,10 @@
 
       <div class="field">
         <label>หมวดหมู่</label>
-        <input v-model="productForm.category" class="form-control" type="text" placeholder="เช่น กีตาร์" />
-      </div>
-
-      <div class="field">
-        <label>ประเภทสินค้า</label>
-        <select v-model="productForm.type" class="form-select">
-          <option value="instrument">เครื่องดนตรี</option>
-          <option value="accessory">อุปกรณ์เสริม</option>
+        <select v-model="productForm.category" class="form-select">
+          <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
         </select>
       </div>
 
@@ -84,7 +72,7 @@
           <tr>
             <th>ID</th>
             <th>สินค้า</th>
-            <th>ประเภท</th>
+            <th>หมวดหมู่</th>
             <th>ราคา</th>
             <th>สต็อก</th>
             <th>จัดการ</th>
@@ -94,11 +82,7 @@
           <tr v-for="item in filteredProducts" :key="item.id">
             <td>{{ item.id }}</td>
             <td>{{ item.name }}</td>
-            <td>
-              <span class="badge" :class="item.type === 'instrument' ? 'text-bg-primary' : 'text-bg-info'">
-                {{ item.type === 'instrument' ? 'เครื่องดนตรี' : 'อุปกรณ์เสริม' }}
-              </span>
-            </td>
+            <td>{{ item.category }}</td>
             <td>{{ item.price }}</td>
             <td>{{ item.stock }}</td>
             <td class="actions">
@@ -121,12 +105,12 @@ defineProps({
     type: String,
     required: true
   },
-  productTypeFilter: {
-    type: String,
-    required: true
-  },
   productForm: {
     type: Object,
+    required: true
+  },
+  categoryOptions: {
+    type: Array,
     required: true
   },
   isSubmittingProduct: {
@@ -149,7 +133,6 @@ defineProps({
 
 defineEmits([
   'updateProductSearch',
-  'updateProductTypeFilter',
   'uploadProductImage',
   'createProduct',
   'openEditProduct',

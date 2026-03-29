@@ -11,6 +11,7 @@ import {
     TrendingProduct,
     updateProduct,
 } from '../repositories/product.repository'
+import { PRODUCT_CATEGORIES } from '../config/product-taxonomy'
 import { HttpError } from '../utils/http-error'
 
 export const getProducts = async (params: {
@@ -19,23 +20,19 @@ export const getProducts = async (params: {
     category?: string | undefined
     search?: string | undefined
     sort?: 'default' | 'lowToHigh' | 'highToLow' | undefined
-    type?: string | undefined
     brand?: string | undefined
 }): Promise<{ items: Product[]; total: number; page: number; limit: number; totalPages: number }> => {
     return listProducts(params)
 }
 
-export const getCategoryCounts = async (
-    type?: string,
-): Promise<Array<{ category: string; displayName: string; count: number; type: string }>> => {
-    return listCategoryCounts(type)
+export const getCategoryCounts = async (): Promise<Array<{ category: string; displayName: string; count: number }>> => {
+    return listCategoryCounts()
 }
 
 export const createProductAsAdmin = async (params: {
     name: string
     brand?: string | undefined
-    category: string
-    type: string
+    category: (typeof PRODUCT_CATEGORIES)[number]
     price: number
     image?: string | undefined
     stock: number
@@ -48,8 +45,7 @@ export const updateProductAsAdmin = async (
     params: {
         name?: string | undefined
         brand?: string | undefined
-        category?: string | undefined
-        type?: string | undefined
+        category?: (typeof PRODUCT_CATEGORIES)[number] | undefined
         price?: number | undefined
         image?: string | undefined
         stock?: number | undefined

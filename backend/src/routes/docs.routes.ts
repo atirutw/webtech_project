@@ -65,14 +65,14 @@ const html = `<!DOCTYPE html>
     <div class="card">
       <p><span class="method">GET</span> <code>/products</code></p>
       <p>List products with paging/filter/sort.</p>
-      <p>Parameters: <code>page</code>, <code>limit</code>, <code>category</code>, <code>type</code>, <code>search</code>, <code>brand</code>, <code>sort</code></p>
+      <p>Parameters: <code>page</code>, <code>limit</code>, <code>category</code>, <code>search</code>, <code>brand</code>, <code>sort</code></p>
       <p>Returns: <code>{ items, total, page, limit, totalPages }</code></p>
     </div>
 
     <div class="card">
       <p><span class="method">GET</span> <code>/products/categories</code></p>
       <p>Get category counts used by frontend filters.</p>
-      <p>Parameters: optional <code>type</code></p>
+      <p>Parameters: none</p>
       <p>Returns: <code>{ categories }</code></p>
     </div>
 
@@ -86,7 +86,8 @@ const html = `<!DOCTYPE html>
     <div class="card">
       <p><span class="method">POST</span> <code>/products</code> (Admin)</p>
       <p>Create product.</p>
-      <p>Parameters: <code>name</code>, <code>brand</code>, <code>category</code>, <code>type</code>, <code>price</code>, <code>image</code>, <code>stock</code></p>
+      <p>Parameters: <code>name</code>, <code>brand</code>, <code>category</code>, <code>price</code>, <code>image</code>, <code>stock</code></p>
+      <p><code>type</code> is derived automatically from <code>category</code> by backend.</p>
       <p>For <code>image</code>, send an uploaded backend media path from <code>/products/media</code> (for example <code>/media/products/123.jpg</code>).</p>
       <p>External image URLs are deprecated and rejected.</p>
       <p>Returns: <code>{ item }</code></p>
@@ -102,7 +103,7 @@ const html = `<!DOCTYPE html>
     <div class="card">
       <p><span class="method">PATCH</span> <code>/products/:id</code> (Admin)</p>
       <p>Update product fields.</p>
-      <p>Parameters: path <code>id</code>, body any editable product field</p>
+      <p>Parameters: path <code>id</code>, body any editable field except <code>type</code></p>
       <p>Returns: <code>{ item }</code></p>
     </div>
 

@@ -1,4 +1,5 @@
 import { pool } from '../db/pool'
+import { getProductTypeByCategory, PRODUCT_CATEGORIES } from '../config/product-taxonomy'
 import { resolveMediaUrl } from '../utils/media'
 
 type ProductRow = {
@@ -18,7 +19,6 @@ export type Product = {
     name: string
     brand: string
     category: string
-    type: string
     price: number
     image: string
     stock: number
@@ -41,7 +41,6 @@ const toProduct = (row: ProductRow): Product => ({
     name: row.name,
     brand: row.brand ?? '',
     category: row.category,
-    type: row.type,
     price: Number(row.price),
     image: resolveMediaUrl(row.image_url),
     stock: row.stock,
@@ -54,7 +53,6 @@ export type ProductListParams = {
     category?: string | undefined
     search?: string | undefined
     sort?: 'default' | 'lowToHigh' | 'highToLow' | undefined
-    type?: string | undefined
     brand?: string | undefined
 }
 
@@ -67,11 +65,6 @@ export const listProducts = async (
     if (params.category) {
         values.push(params.category)
         whereClauses.push(`category = $${values.length}`)
-    }
-
-    if (params.type) {
-        values.push(params.type)
-        whereClauses.push(`type = $${values.length}`)
     }
 
     if (params.brand) {
@@ -130,32 +123,19 @@ export const listProducts = async (
     }
 }
 
-export const listCategoryCounts = async (
-    type?: string,
-): Promise<Array<{ category: string; displayName: string; count: number; type: string }>> => {
-    const values: string[] = []
-    const whereSql = type
-        ? (() => {
-            values.push(type)
-            return 'WHERE type = $1'
-        })()
-        : ''
-
-    const result = await pool.query<{ category: string; display_name: string | null; count: string; type: string | null }>(
+export const listCategoryCounts = async (): Promise<Array<{ category: string; displayName: string; count: number }>> => {
+    const result = await pool.query<{ category: string; display_name: string | null; count: string }>(
         `
         SELECT
             p.category,
             m.display_name,
-            COALESCE(m.type, p.type) AS type,
             COUNT(*)::text AS count
         FROM products AS p
         LEFT JOIN product_category_display AS m
             ON m.category = p.category
-        ${whereSql}
-        GROUP BY p.category, m.display_name, COALESCE(m.type, p.type)
-        ORDER BY COALESCE(m.type, p.type) ASC, p.category ASC
+        GROUP BY p.category, m.display_name
+        ORDER BY p.category ASC
         `,
-        values,
     )
 
     return result.rows.map((row) => ({
@@ -168,19 +148,19 @@ export const listCategoryCounts = async (
                 .map((chunk) => `${chunk[0]?.toUpperCase() ?? ''}${chunk.slice(1)}`)
                 .join(' '),
         count: Number(row.count),
-        type: row.type ?? 'instrument',
     }))
 }
 
 export const createProduct = async (params: {
     name: string
     brand?: string | undefined
-    category: string
-    type: string
+    category: (typeof PRODUCT_CATEGORIES)[number]
     price: number
     image?: string | undefined
     stock: number
 }): Promise<Product> => {
+    const type = getProductTypeByCategory(params.category)
+
     const result = await pool.query<ProductRow>(
         `
         INSERT INTO products (name, brand, category, type, price, image_url, stock)
@@ -191,7 +171,7 @@ export const createProduct = async (params: {
             params.name,
             params.brand || null,
             params.category,
-            params.type,
+            type,
             params.price,
             params.image || null,
             params.stock,
@@ -232,8 +212,7 @@ export const updateProduct = async (
     params: {
         name?: string | undefined
         brand?: string | undefined
-        category?: string | undefined
-        type?: string | undefined
+        category?: (typeof PRODUCT_CATEGORIES)[number] | undefined
         price?: number | undefined
         image?: string | undefined
         stock?: number | undefined
@@ -253,12 +232,12 @@ export const updateProduct = async (
     }
 
     if (params.category !== undefined) {
+        const derivedType = getProductTypeByCategory(params.category)
+
         values.push(params.category)
         updates.push(`category = $${values.length}`)
-    }
 
-    if (params.type !== undefined) {
-        values.push(params.type)
+        values.push(derivedType)
         updates.push(`type = $${values.length}`)
     }
 

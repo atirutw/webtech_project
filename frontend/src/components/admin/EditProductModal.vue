@@ -16,14 +16,10 @@
 
         <div class="field">
           <label>หมวดหมู่</label>
-          <input v-model="editForm.category" class="form-control" type="text" />
-        </div>
-
-        <div class="field">
-          <label>ประเภทสินค้า</label>
-          <select v-model="editForm.type" class="form-select">
-            <option value="instrument">เครื่องดนตรี</option>
-            <option value="accessory">อุปกรณ์เสริม</option>
+          <select v-model="editForm.category" class="form-select">
+            <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
           </select>
         </div>
 
@@ -71,6 +67,10 @@ defineProps({
   },
   editForm: {
     type: Object,
+    required: true
+  },
+  categoryOptions: {
+    type: Array,
     required: true
   },
   isSavingEdit: {

@@ -11,6 +11,7 @@ import {
     getTrendingProducts,
     updateProductAsAdmin,
 } from '../services/product.service'
+import { PRODUCT_CATEGORIES } from '../config/product-taxonomy'
 import { normalizeStoredMediaPath, resolveMediaUrl } from '../utils/media'
 import { HttpError } from '../utils/http-error'
 
@@ -25,36 +26,32 @@ const imagePathSchema = z
         message: 'Use uploaded image path from /products/media',
     })
 
+const productCategorySchema = z.enum(PRODUCT_CATEGORIES)
+
 const listProductsQuerySchema = z.object({
     page: z.coerce.number().int().positive().optional(),
     limit: z.coerce.number().int().positive().max(50).optional(),
-    category: z.string().trim().min(1).optional(),
+    category: productCategorySchema.optional(),
     search: z.string().trim().min(1).optional(),
     sort: z.enum(['default', 'lowToHigh', 'highToLow']).optional(),
-    type: z.string().trim().min(1).optional(),
     brand: z.string().trim().min(1).optional(),
 })
 
-const categoryQuerySchema = z.object({
-    type: z.string().trim().min(1).optional(),
-})
-
-const productBodySchema = z.object({
-    name: z.string().trim().min(1),
-    brand: z.string().trim().optional(),
-    category: z.string().trim().min(1),
-    type: z.string().trim().min(1).default('instrument'),
-    price: z.coerce.number().nonnegative(),
-    image: imagePathSchema.optional(),
-    stock: z.coerce.number().int().nonnegative().default(0),
-})
+const productBodySchema = z
+    .object({
+        name: z.string().trim().min(1),
+        brand: z.string().trim().optional(),
+        category: productCategorySchema,
+        price: z.coerce.number().nonnegative(),
+        image: imagePathSchema.optional(),
+        stock: z.coerce.number().int().nonnegative().default(0),
+    })
 
 const updateProductBodySchema = z
     .object({
         name: z.string().trim().min(1).optional(),
         brand: z.string().trim().optional(),
-        category: z.string().trim().min(1).optional(),
-        type: z.string().trim().min(1).optional(),
+        category: productCategorySchema.optional(),
         price: z.coerce.number().nonnegative().optional(),
         image: imagePathSchema.optional(),
         stock: z.coerce.number().int().nonnegative().optional(),
@@ -84,7 +81,6 @@ export const listProductsController: RequestHandler = async (req, res, next) => 
             category: query.category,
             search: query.search,
             sort: query.sort ?? 'default',
-            type: query.type,
             brand: query.brand,
         })
 
@@ -107,8 +103,11 @@ export const getProductController: RequestHandler = async (req, res, next) => {
 
 export const categoryCountsController: RequestHandler = async (req, res, next) => {
     try {
-        const query = categoryQuerySchema.parse(req.query)
-        const payload = await getCategoryCounts(query.type)
+        if (Object.keys(req.query).length > 0) {
+            throw new HttpError(400, 'This endpoint does not accept query parameters')
+        }
+
+        const payload = await getCategoryCounts()
 
         res.status(200).json({ categories: payload })
     } catch (error) {

@@ -385,7 +385,7 @@ onMounted(async () => {
 <style>
 .admin-page {
   min-height: 100vh;
-  padding: 90px 24px 24px;
+  padding: 24px;
 }
 
 .panel {
@@ -575,7 +575,7 @@ button {
 
 @media (max-width: 992px) {
   .admin-page {
-    padding: 84px 16px 16px;
+    padding: 16px;
   }
 
   .panel {

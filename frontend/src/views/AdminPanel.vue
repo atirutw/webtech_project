@@ -119,6 +119,9 @@
                 </td>
                 <td class="actions">
                   <button class="btn btn-outline-success btn-sm" @click="saveUser(user.id)">บันทึก</button>
+                  <router-link :to="`/admin/users/${user.id}/orders`" class="btn btn-outline-info btn-sm">
+                    ประวัติการซื้อ
+                  </router-link>
                   <button
                     class="btn btn-outline-danger btn-sm"
                     :disabled="user.id === authStore.user?.id"

@@ -22,6 +22,12 @@
               สินค้า
             </router-link>
           </li>
+          <li v-if="auth.isAuthenticated">
+            <router-link to="/orders" class="nav-pill" :class="{ active: isOrdersRoute }">
+              <i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
+              ประวัติการซื้อ
+            </router-link>
+          </li>
           <li v-if="auth.user?.role === 'admin'">
             <router-link to="/admin" class="nav-pill" :class="{ active: isAdminRoute }">
               <i class="bi bi-shield-lock" aria-hidden="true"></i>
@@ -81,6 +87,12 @@
               <router-link to="/products" class="mobile-link" :class="{ active: isProductsRoute }" data-bs-dismiss="offcanvas">
                 <i class="bi bi-box-seam" aria-hidden="true"></i>
                 สินค้า
+              </router-link>
+            </li>
+            <li v-if="auth.isAuthenticated">
+              <router-link to="/orders" class="mobile-link" :class="{ active: isOrdersRoute }" data-bs-dismiss="offcanvas">
+                <i class="bi bi-receipt-cutoff" aria-hidden="true"></i>
+                ประวัติการซื้อ
               </router-link>
             </li>
             <li v-if="auth.user?.role === 'admin'">
@@ -144,6 +156,7 @@ const userInitials = computed(() => {
 
 const isHomeRoute = computed(() => route.path === '/')
 const isProductsRoute = computed(() => route.path.startsWith('/products') || route.path.startsWith('/category/'))
+const isOrdersRoute = computed(() => route.path.startsWith('/orders'))
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 const isCartRoute = computed(() => route.path.startsWith('/cart'))
 

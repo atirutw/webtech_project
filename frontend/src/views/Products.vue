@@ -70,6 +70,9 @@
             <button class="market-btn-primary cart-btn" @click="addToCart(product)">
               เพิ่มลงตะกร้า
             </button>
+            <router-link class="btn btn-outline-secondary btn-sm mt-2" :to="`/products/${product.id}`">
+              ดูรายละเอียด
+            </router-link>
           </div>
         </article>
       </div>

@@ -1,6 +1,6 @@
 <template>
   <nav class="market-nav fixed-top" :class="{ scrolled: isScrolled }">
-    <div class="container-fluid px-3 px-lg-5 nav-shell-wrap">
+    <div class="container-fluid nav-shell-wrap">
       <div class="nav-shell market-surface">
         <router-link to="/" class="brand-link">
           <span class="brand-mark" aria-hidden="true">
@@ -172,6 +172,9 @@ const handleLogout = async () => {
 
 .nav-shell-wrap {
   position: relative;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .nav-shell {
@@ -389,6 +392,12 @@ const handleLogout = async () => {
 
   .brand-link {
     font-size: 1.16rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-shell-wrap {
+    padding: 0 12px;
   }
 }
 </style>

@@ -26,6 +26,21 @@
           <span>รวม {{ order.totalAmount.toLocaleString() }} บาท</span>
         </div>
 
+        <div class="journey-wrap" v-if="order.journey?.length">
+          <h2>เส้นทางคำสั่งซื้อ</h2>
+          <div class="journey-grid">
+            <article
+              v-for="step in order.journey"
+              :key="step.key"
+              class="journey-step"
+              :class="{ completed: step.completed }"
+            >
+              <p class="journey-label">{{ step.label }}</p>
+              <p class="journey-time">{{ step.timestamp ? formatDate(step.timestamp) : 'รอดำเนินการ' }}</p>
+            </article>
+          </div>
+        </div>
+
         <div class="item-list">
           <article class="item-row" v-for="item in order.items" :key="`${order.id}-${item.productId}`">
             <div>
@@ -151,6 +166,44 @@ onMounted(async () => {
   gap: 10px;
   margin-bottom: 12px;
   font-weight: 600;
+}
+
+.journey-wrap {
+  margin-bottom: 14px;
+}
+
+.journey-wrap h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.journey-step {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--bg-surface-soft);
+}
+
+.journey-step.completed {
+  border-color: #16a34a;
+  background: #dcfce7;
+}
+
+.journey-label {
+  margin: 0;
+  font-weight: 700;
+}
+
+.journey-time {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .status-badge {

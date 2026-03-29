@@ -97,6 +97,39 @@
         <i class="bi bi-arrow-right" aria-hidden="true"></i>
       </router-link>
     </section>
+
+    <section class="section-block market-surface">
+      <header class="section-head">
+        <h2>
+          <i class="bi bi-fire" aria-hidden="true"></i>
+          กำลังมาแรง
+        </h2>
+      </header>
+
+      <div class="featured-grid" v-if="trendingProducts.length > 0">
+        <article class="featured-card market-card" v-for="entry in trendingProducts" :key="entry.item.id">
+          <img :src="entry.item.image || fallbackImage" :alt="entry.item.name" />
+          <h3>{{ entry.item.name }}</h3>
+          <p class="meta">ขายแล้ว {{ entry.soldCount }} ชิ้น</p>
+          <p class="price">{{ entry.item.price.toLocaleString() }} บาท</p>
+          <router-link class="cta-outline" :to="`/products/${entry.item.id}`">ดูรายละเอียด</router-link>
+        </article>
+      </div>
+      <div class="section-state" v-else-if="!isLoading">ยังไม่มีข้อมูลสินค้ามาแรง</div>
+    </section>
+
+    <section class="section-block market-surface" v-if="wishlistPreview.length > 0">
+      <header class="section-head">
+        <h2>
+          <i class="bi bi-heart-fill" aria-hidden="true"></i>
+          Wishlist ของคุณ
+        </h2>
+      </header>
+
+      <div class="recent-list">
+        <span class="recent-chip" v-for="id in wishlistPreview" :key="id">สินค้า #{{ id }}</span>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -110,8 +143,10 @@ const cartStore = useCartStore()
 const isLoading = ref(false)
 const errorMessage = ref('')
 const featuredProducts = ref([])
+const trendingProducts = ref([])
 const topCategories = ref([])
 const totalCatalogCount = ref(0)
+const wishlistPreview = ref([])
 const fallbackImage = '/src/assets/music.jpg'
 
 const spotlightCategoryLink = computed(() => {
@@ -143,7 +178,7 @@ const fetchHomeData = async () => {
   errorMessage.value = ''
 
   try {
-    const [productsRes, categoriesRes] = await Promise.all([
+    const [productsRes, categoriesRes, trendingRes] = await Promise.all([
       api.get('/products', {
         params: {
           page: 1,
@@ -151,7 +186,12 @@ const fetchHomeData = async () => {
           sort: 'default'
         }
       }),
-      api.get('/products/categories')
+      api.get('/products/categories'),
+      api.get('/products/trending', {
+        params: {
+          limit: 6
+        }
+      })
     ])
 
     const allProducts = productsRes.data.items || []
@@ -161,6 +201,7 @@ const fetchHomeData = async () => {
     featuredProducts.value = (inStockProducts.length > 0 ? inStockProducts : allProducts).slice(0, 3)
 
     totalCatalogCount.value = categories.reduce((sum, item) => sum + item.count, 0)
+    trendingProducts.value = trendingRes.data.products || []
     topCategories.value = categories
       .slice()
       .sort((a, b) => b.count - a.count)
@@ -176,6 +217,7 @@ const fetchHomeData = async () => {
   } catch (error) {
     errorMessage.value = error?.response?.data?.message || 'โหลดข้อมูลหน้าแรกไม่สำเร็จ'
     featuredProducts.value = []
+    trendingProducts.value = []
     topCategories.value = []
     totalCatalogCount.value = 0
   } finally {
@@ -183,11 +225,23 @@ const fetchHomeData = async () => {
   }
 }
 
+const loadWishlistPreview = () => {
+  try {
+    const ids = JSON.parse(localStorage.getItem('wishlist_products') || '[]')
+    wishlistPreview.value = Array.isArray(ids) ? ids.slice(0, 6) : []
+  } catch {
+    wishlistPreview.value = []
+  }
+}
+
 const addToCart = (product) => {
   cartStore.addToCart(product)
 }
 
-onMounted(fetchHomeData)
+onMounted(async () => {
+  loadWishlistPreview()
+  await fetchHomeData()
+})
 </script>
 
 <style scoped>

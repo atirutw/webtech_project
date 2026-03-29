@@ -16,6 +16,7 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 
 onMounted(async () => {
+  cartStore.initializeLiveSync()
   await authStore.initializeSession()
   await cartStore.mergeGuestCartIntoServerCart()
   await cartStore.loadCart()

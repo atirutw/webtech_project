@@ -6,6 +6,14 @@
     <div class="sidebar-nav" role="tablist" aria-label="Admin categories">
       <button
         class="sidebar-item"
+        :class="{ active: activeSection === 'dashboard' }"
+        @click="$emit('changeSection', 'dashboard')">
+        <span class="sidebar-item-title">Command Center</span>
+        <span class="sidebar-item-meta">ภาพรวมธุรกิจ</span>
+      </button>
+
+      <button
+        class="sidebar-item"
         :class="{ active: activeSection === 'products' }"
         @click="$emit('changeSection', 'products')">
         <span class="sidebar-item-title">จัดการสินค้า</span>

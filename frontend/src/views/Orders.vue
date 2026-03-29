@@ -11,6 +11,7 @@
 
       <p v-if="isLoading" class="state-text">กำลังโหลดประวัติการสั่งซื้อ...</p>
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+      <p v-if="reorderMessage" class="success-text">{{ reorderMessage }}</p>
 
       <div v-if="!isLoading && orders.length === 0" class="empty-state">
         <p>ยังไม่มีประวัติการสั่งซื้อ</p>
@@ -29,6 +30,9 @@
           <div class="order-right">
             <p class="order-total">{{ order.totalAmount.toLocaleString() }} บาท</p>
             <span class="status-badge">{{ mapStatus(order.status) }}</span>
+            <button class="btn btn-outline-warning btn-sm" @click="reorder(order.id)">
+              สั่งซ้ำ
+            </button>
             <router-link :to="`/orders/${order.id}`" class="btn btn-outline-secondary btn-sm">
               ดูรายละเอียด
             </router-link>
@@ -45,13 +49,16 @@ import { useRouter } from 'vue-router'
 
 import { api } from '../lib/api'
 import { useAuthStore } from '../stores/auth'
+import { useCartStore } from '../stores/cart'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const cartStore = useCartStore()
 
 const isLoading = ref(false)
 const errorMessage = ref('')
 const orders = ref([])
+const reorderMessage = ref('')
 
 const mapStatus = (status) => {
   if (status === 'confirmed') {
@@ -83,6 +90,16 @@ const loadOrders = async () => {
     errorMessage.value = error?.response?.data?.message || 'โหลดประวัติการสั่งซื้อไม่สำเร็จ'
   } finally {
     isLoading.value = false
+  }
+}
+
+const reorder = async (orderId) => {
+  reorderMessage.value = ''
+  const payload = await cartStore.reorder(orderId)
+
+  if (payload) {
+    reorderMessage.value = `สั่งซ้ำจากออเดอร์ #${orderId} สำเร็จ`
+    router.push('/cart')
   }
 }
 
@@ -172,6 +189,11 @@ onMounted(async () => {
 .state-text,
 .error-text {
   margin: 10px 0;
+}
+
+.success-text {
+  margin: 10px 0;
+  color: #166534;
 }
 
 .error-text {

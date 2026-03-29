@@ -7,7 +7,10 @@ export const useCartStore = defineStore('cart', {
   state: () => ({
     items: JSON.parse(localStorage.getItem('cart')) || [],
     checkoutResult: null,
-    errorMessage: ''
+    errorMessage: '',
+    syncReady: false,
+    syncChannel: null,
+    syncStorageHandler: null
   }),
 
   getters: {
@@ -27,6 +30,46 @@ export const useCartStore = defineStore('cart', {
 
     saveLocalCart() {
       localStorage.setItem('cart', JSON.stringify(this.items))
+    },
+
+    broadcastCartSync(type = 'refresh') {
+      if (this.syncChannel) {
+        this.syncChannel.postMessage({ type, timestamp: Date.now() })
+      }
+    },
+
+    initializeLiveSync() {
+      if (this.syncReady || typeof window === 'undefined') {
+        return
+      }
+
+      if ('BroadcastChannel' in window) {
+        this.syncChannel = new BroadcastChannel('musicstore-cart-sync')
+        this.syncChannel.onmessage = async () => {
+          if (this.shouldUseServerCart()) {
+            await this.loadCart()
+            return
+          }
+
+          this.items = this.getGuestCartFromStorage()
+        }
+      }
+
+      this.syncStorageHandler = async (event) => {
+        if (event.key !== 'cart') {
+          return
+        }
+
+        if (this.shouldUseServerCart()) {
+          await this.loadCart()
+          return
+        }
+
+        this.items = this.getGuestCartFromStorage()
+      }
+
+      window.addEventListener('storage', this.syncStorageHandler)
+      this.syncReady = true
     },
 
     authHeaders() {
@@ -118,6 +161,7 @@ export const useCartStore = defineStore('cart', {
       }
 
       this.saveLocalCart()
+      this.broadcastCartSync('guest-updated')
     },
 
     async addToCart(product) {
@@ -137,6 +181,7 @@ export const useCartStore = defineStore('cart', {
         })
 
         this.items = this.mapServerItems(response.data.items || [])
+        this.broadcastCartSync('server-updated')
       } catch (error) {
         this.errorMessage = error?.response?.data?.message || 'เพิ่มสินค้าไม่สำเร็จ'
       }
@@ -148,6 +193,7 @@ export const useCartStore = defineStore('cart', {
         if (item) {
           item.qty++
           this.saveLocalCart()
+          this.broadcastCartSync('guest-updated')
         }
         return
       }
@@ -165,6 +211,7 @@ export const useCartStore = defineStore('cart', {
         })
 
         this.items = this.mapServerItems(response.data.items || [])
+        this.broadcastCartSync('server-updated')
       } catch (error) {
         this.errorMessage = error?.response?.data?.message || 'อัปเดตจำนวนสินค้าไม่สำเร็จ'
       }
@@ -176,6 +223,7 @@ export const useCartStore = defineStore('cart', {
         if (item && item.qty > 1) {
           item.qty--
           this.saveLocalCart()
+          this.broadcastCartSync('guest-updated')
         }
         return
       }
@@ -193,6 +241,7 @@ export const useCartStore = defineStore('cart', {
         })
 
         this.items = this.mapServerItems(response.data.items || [])
+        this.broadcastCartSync('server-updated')
       } catch (error) {
         this.errorMessage = error?.response?.data?.message || 'อัปเดตจำนวนสินค้าไม่สำเร็จ'
       }
@@ -202,6 +251,7 @@ export const useCartStore = defineStore('cart', {
       if (!this.shouldUseServerCart()) {
         this.items = this.items.filter(i => i.cartKey !== cartKey)
         this.saveLocalCart()
+        this.broadcastCartSync('guest-updated')
         return
       }
 
@@ -216,6 +266,7 @@ export const useCartStore = defineStore('cart', {
         })
 
         this.items = this.mapServerItems(response.data.items || [])
+        this.broadcastCartSync('server-updated')
       } catch (error) {
         this.errorMessage = error?.response?.data?.message || 'ลบสินค้าไม่สำเร็จ'
       }
@@ -237,10 +288,33 @@ export const useCartStore = defineStore('cart', {
 
         this.checkoutResult = response.data.order
         this.items = []
+        this.broadcastCartSync('server-updated')
 
         return response.data.order
       } catch (error) {
         this.errorMessage = error?.response?.data?.message || 'ชำระเงินไม่สำเร็จ'
+        return null
+      }
+    },
+
+    async reorder(orderId) {
+      this.errorMessage = ''
+
+      if (!this.shouldUseServerCart()) {
+        this.errorMessage = 'กรุณาเข้าสู่ระบบก่อนทำรายการสั่งซ้ำ'
+        return null
+      }
+
+      try {
+        const response = await api.post(`/orders/${orderId}/reorder`, null, {
+          headers: this.authHeaders()
+        })
+
+        this.items = this.mapServerItems(response.data.items || [])
+        this.broadcastCartSync('server-updated')
+        return response.data
+      } catch (error) {
+        this.errorMessage = error?.response?.data?.message || 'สั่งซ้ำไม่สำเร็จ'
         return null
       }
     }

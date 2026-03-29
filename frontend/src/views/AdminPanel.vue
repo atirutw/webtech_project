@@ -8,6 +8,19 @@
         @change-section="activeSection = $event" />
 
       <main class="admin-content">
+        <section v-show="activeSection === 'dashboard'" class="section">
+          <div v-if="dashboardLoading" class="state-text">กำลังโหลดข้อมูล Command Center...</div>
+          <div v-else-if="dashboardError" class="state-error">
+            {{ dashboardError }}
+            <button class="btn btn-outline-warning btn-sm ms-2" @click="fetchDashboard">ลองใหม่</button>
+          </div>
+          <AdminDashboardSection
+            v-else-if="dashboard"
+            :dashboard="dashboard"
+            :days="dashboardDays" />
+          <div v-else class="state-text">ยังไม่มีข้อมูล Command Center</div>
+        </section>
+
         <ProductManagementSection
           v-show="activeSection === 'products'"
           :product-search="productSearch"
@@ -56,6 +69,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import AdminSidebar from '../components/admin/AdminSidebar.vue'
+import AdminDashboardSection from '../components/admin/AdminDashboardSection.vue'
 import DeleteConfirmModal from '../components/admin/DeleteConfirmModal.vue'
 import EditProductModal from '../components/admin/EditProductModal.vue'
 import ProductManagementSection from '../components/admin/ProductManagementSection.vue'
@@ -70,13 +84,17 @@ const router = useRouter()
 const products = ref([])
 const users = ref([])
 const userDrafts = ref({})
+const dashboard = ref(null)
+const dashboardDays = ref(7)
+const dashboardLoading = ref(false)
+const dashboardError = ref('')
 
 const isSubmittingProduct = ref(false)
 const isSavingEdit = ref(false)
 const isDeleting = ref(false)
 const productMessage = ref('')
 const userMessage = ref('')
-const activeSection = ref('products')
+const activeSection = ref('dashboard')
 
 const productSearch = ref('')
 const productTypeFilter = ref('all')
@@ -145,6 +163,28 @@ const fetchUsers = async () => {
   const response = await api.get('/admin/users', adminHeaders())
   users.value = response.data.users || []
   buildUserDrafts(users.value)
+}
+
+const fetchDashboard = async () => {
+  dashboardLoading.value = true
+  dashboardError.value = ''
+
+  try {
+    const response = await api.get('/admin/dashboard', {
+      ...adminHeaders(),
+      params: {
+        days: dashboardDays.value
+      }
+    })
+
+    dashboard.value = response.data.dashboard
+  } catch (error) {
+    dashboard.value = null
+    dashboardError.value = error?.response?.data?.message || 'โหลดข้อมูล Command Center ไม่สำเร็จ'
+    activeSection.value = 'products'
+  } finally {
+    dashboardLoading.value = false
+  }
 }
 
 const filteredProducts = computed(() => {
@@ -333,7 +373,7 @@ onMounted(async () => {
     return
   }
 
-  await Promise.all([fetchProducts(), fetchUsers()])
+  await Promise.all([fetchProducts(), fetchUsers(), fetchDashboard()])
 })
 </script>
 
@@ -417,6 +457,14 @@ onMounted(async () => {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
+}
+
+.state-text {
+  color: var(--text-secondary);
+}
+
+.state-error {
+  color: #b91c1c;
 }
 
 .section-head {

@@ -14,3 +14,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Generated media files
+media/*
+backend/media/*
+!backend/media/products/
+backend/media/products/*
+!backend/media/products/seed/
+backend/media/products/seed/*
+!backend/media/products/seed/.gitkeep

@@ -4,9 +4,23 @@ import { api } from '../lib/api'
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
 
+const normalizeUser = (user) => {
+    if (!user || typeof user !== 'object') {
+        return null
+    }
+
+    const rawId = user.id
+    const parsedId = Number(rawId)
+
+    return {
+        ...user,
+        id: Number.isFinite(parsedId) ? parsedId : rawId
+    }
+}
+
 const getInitialUser = () => {
     try {
-        return JSON.parse(localStorage.getItem(USER_KEY) || 'null')
+        return normalizeUser(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
     } catch {
         return null
     }
@@ -25,7 +39,7 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         setSession(payload) {
             this.token = payload.token
-            this.user = payload.user
+            this.user = normalizeUser(payload.user)
 
             localStorage.setItem(TOKEN_KEY, this.token)
             localStorage.setItem(USER_KEY, JSON.stringify(this.user))
@@ -59,7 +73,7 @@ export const useAuthStore = defineStore('auth', {
                     headers: this.authHeaders()
                 })
 
-                this.user = response.data.user
+                this.user = normalizeUser(response.data.user)
                 localStorage.setItem(USER_KEY, JSON.stringify(this.user))
             } catch {
                 this.clearSession()
@@ -77,7 +91,7 @@ export const useAuthStore = defineStore('auth', {
                 headers: this.authHeaders()
             })
 
-            this.user = response.data.user
+            this.user = normalizeUser(response.data.user)
             localStorage.setItem(USER_KEY, JSON.stringify(this.user))
 
             return response.data

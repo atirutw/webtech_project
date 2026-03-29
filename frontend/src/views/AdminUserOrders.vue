@@ -12,11 +12,11 @@
       <p v-if="isLoading" class="state-text">กำลังโหลดข้อมูล...</p>
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
-      <div v-if="!isLoading && orders.length === 0" class="empty-state">
+      <div v-if="!isLoading && !errorMessage && orders.length === 0" class="empty-state">
         สมาชิกคนนี้ยังไม่มีประวัติการซื้อ
       </div>
 
-      <div v-else class="list-wrap">
+      <div v-else-if="!isLoading && !errorMessage" class="list-wrap">
         <article v-for="order in orders" :key="order.id" class="order-row">
           <div>
             <p class="order-id">ออเดอร์ #{{ order.id }}</p>

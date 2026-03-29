@@ -13,12 +13,12 @@
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
       <p v-if="reorderMessage" class="success-text">{{ reorderMessage }}</p>
 
-      <div v-if="!isLoading && orders.length === 0" class="empty-state">
+      <div v-if="!isLoading && !errorMessage && orders.length === 0" class="empty-state">
         <p>ยังไม่มีประวัติการสั่งซื้อ</p>
         <router-link to="/products" class="market-btn-primary">เลือกซื้อสินค้า</router-link>
       </div>
 
-      <div v-else class="list-wrap">
+      <div v-else-if="!isLoading && !errorMessage" class="list-wrap">
         <article v-for="order in orders" :key="order.id" class="order-row">
           <div>
             <p class="order-id">ออเดอร์ #{{ order.id }}</p>

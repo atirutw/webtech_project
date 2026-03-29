@@ -41,7 +41,7 @@
           :user-message="userMessage"
           :filtered-users="filteredUsers"
           :user-drafts="userDrafts"
-          :current-user-id="authStore.user?.id || null"
+          :current-user-id="currentUserId"
           @update-user-search="userSearch = $event"
           @save-user="saveUser"
           @request-delete-user="requestDeleteUser" />
@@ -80,6 +80,11 @@ import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
+
+const currentUserId = computed(() => {
+  const parsedId = Number(authStore.user?.id)
+  return Number.isFinite(parsedId) ? parsedId : null
+})
 
 const products = ref([])
 const users = ref([])
@@ -297,7 +302,7 @@ const requestDeleteProduct = (product) => {
 }
 
 const requestDeleteUser = (user) => {
-  if (user.id === authStore.user?.id) return
+  if (user.id === currentUserId.value) return
 
   deleteDialog.value = {
     open: true,

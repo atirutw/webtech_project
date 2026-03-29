@@ -62,7 +62,7 @@
           class="category-card"
         >
           <img :src="entry.image || fallbackImage" :alt="entry.displayName" />
-          <div class="overlay">{{ entry.displayName }} ({{ entry.count }})</div>
+          <div class="category-label">{{ entry.displayName }} ({{ entry.count }})</div>
         </router-link>
       </div>
 
@@ -417,7 +417,7 @@ h1 {
   transform: scale(1.06);
 }
 
-.overlay {
+.category-label {
   position: absolute;
   left: 10px;
   bottom: 10px;
@@ -430,6 +430,9 @@ h1 {
 
 .featured-card {
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .featured-card img {
@@ -441,6 +444,8 @@ h1 {
 
 .featured-card h3 {
   margin: 12px 0 6px;
+  line-height: 1.25;
+  min-height: 2.5em;
 }
 
 .meta {
@@ -456,7 +461,8 @@ h1 {
 }
 
 .buy-btn {
-  margin-top: 12px;
+  margin-top: auto;
+  margin-bottom: 2px;
   width: 100%;
 }
 
@@ -481,7 +487,7 @@ h1 {
     color: #fcd34d;
   }
 
-  .overlay {
+  .category-label {
     background: rgba(2, 6, 23, 0.78);
   }
 

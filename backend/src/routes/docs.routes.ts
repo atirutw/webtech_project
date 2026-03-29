@@ -138,7 +138,7 @@ const html = `<!DOCTYPE html>
     </div>
 
     <div class="card">
-      <p><span class="method">POST</span> <code>/cart/checkout</code> (Member only)</p>
+      <p><span class="method">POST</span> <code>/cart/checkout</code> (Authenticated user)</p>
       <p>Confirm purchase and create order.</p>
       <p>Returns: <code>{ order }</code></p>
       <pre>{ "order": { "id": 12, "status": "confirmed", "totalAmount": 12900 } }</pre>

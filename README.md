@@ -14,6 +14,6 @@ This page contains endpoint purpose, parameters, return payload, and example usa
 - Product listing + product detail
 - Admin product management (add/edit/delete + image URL)
 - Register/login/profile edit
-- Cart management + checkout (member only)
+- Cart management + checkout (authenticated users)
 - Member order history + order detail
 - Admin member management + per-member order history/detail

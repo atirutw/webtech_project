@@ -146,7 +146,7 @@ export const checkoutCart = async (userId: number): Promise<{
             VALUES ($1, $2, $3)
             RETURNING id, status, created_at
             `,
-            [userId, 'pending', totalAmount],
+            [userId, 'confirmed', totalAmount],
         )
 
         const order = orderResult.rows[0]

@@ -89,6 +89,11 @@ export const removeCartItemController: RequestHandler = async (req, res, next) =
 export const checkoutController: RequestHandler = async (req, res, next) => {
     try {
         const userId = getAuthUserId(req)
+
+        if (req.authUser?.role !== 'customer') {
+            throw new HttpError(403, 'Only members can place orders')
+        }
+
         const payload = await checkoutCart(userId)
 
         res.status(200).json(payload)

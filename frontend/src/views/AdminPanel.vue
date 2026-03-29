@@ -9,7 +9,7 @@
 
       <main class="admin-content">
         <section v-show="activeSection === 'dashboard'" class="section">
-          <div v-if="dashboardLoading" class="state-text">กำลังโหลดข้อมูล Command Center...</div>
+          <div v-if="dashboardLoading" class="state-text">กำลังโหลดข้อมูลศูนย์ควบคุม...</div>
           <div v-else-if="dashboardError" class="state-error">
             {{ dashboardError }}
             <button class="btn btn-outline-warning btn-sm ms-2" @click="fetchDashboard">ลองใหม่</button>
@@ -18,7 +18,7 @@
             v-else-if="dashboard"
             :dashboard="dashboard"
             :days="dashboardDays" />
-          <div v-else class="state-text">ยังไม่มีข้อมูล Command Center</div>
+          <div v-else class="state-text">ยังไม่มีข้อมูลศูนย์ควบคุม</div>
         </section>
 
         <ProductManagementSection
@@ -185,7 +185,7 @@ const fetchDashboard = async () => {
     dashboard.value = response.data.dashboard
   } catch (error) {
     dashboard.value = null
-    dashboardError.value = error?.response?.data?.message || 'โหลดข้อมูล Command Center ไม่สำเร็จ'
+    dashboardError.value = error?.response?.data?.message || 'โหลดข้อมูลศูนย์ควบคุมไม่สำเร็จ'
     activeSection.value = 'products'
   } finally {
     dashboardLoading.value = false

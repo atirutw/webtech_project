@@ -5,9 +5,9 @@
     <div class="login-card card border-0 shadow-lg p-4 p-md-5">
       <h1 class="text-warning mb-2">
         <i class="bi bi-person-circle me-2" aria-hidden="true"></i>
-        Welcome Back
+        ยินดีต้อนรับกลับ
       </h1>
-      <p class="subtitle mb-4">Login to your Music World</p>
+      <p class="subtitle mb-4">เข้าสู่ระบบเพื่อเริ่มเลือกซื้อเครื่องดนตรี</p>
 
       <form @submit.prevent="handleLogin" class="d-grid gap-3">
         <div class="form-floating">
@@ -16,10 +16,10 @@
             type="email"
             class="form-control form-control-lg market-auth-input"
             id="email"
-            placeholder="Email"
+            placeholder="อีเมล"
             required
           />
-          <label for="email">Email</label>
+          <label for="email">อีเมล</label>
         </div>
 
         <div class="form-floating">
@@ -28,15 +28,15 @@
             type="password"
             class="form-control form-control-lg market-auth-input"
             id="password"
-            placeholder="Password"
+            placeholder="รหัสผ่าน"
             required
           />
-          <label for="password">Password</label>
+          <label for="password">รหัสผ่าน</label>
         </div>
 
         <button type="submit" class="btn btn-warning btn-lg fw-semibold" :disabled="isSubmitting">
           <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          {{ isSubmitting ? 'Logging in...' : 'Login' }}
+          {{ isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ' }}
         </button>
       </form>
 
@@ -81,7 +81,7 @@ const handleLogin = async () => {
 
     router.push("/")
   } catch (error) {
-    errorMessage.value = error?.response?.data?.message || "Login failed"
+    errorMessage.value = error?.response?.data?.message || 'เข้าสู่ระบบไม่สำเร็จ'
   } finally {
     isSubmitting.value = false
   }

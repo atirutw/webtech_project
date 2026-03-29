@@ -22,8 +22,8 @@
         <div class="field">
           <label>ประเภทสินค้า</label>
           <select v-model="editForm.type" class="form-select">
-            <option value="instrument">instrument</option>
-            <option value="accessory">accessory</option>
+            <option value="instrument">เครื่องดนตรี</option>
+            <option value="accessory">อุปกรณ์เสริม</option>
           </select>
         </div>
 

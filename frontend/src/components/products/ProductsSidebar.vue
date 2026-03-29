@@ -15,7 +15,7 @@
         <li
           :class="{ active: selectedFacet === `type:${group.type}` }"
           @click="$emit('typeSelected', group.type)">
-          {{ group.label }}ทั้งหมด ({{ group.count }})
+          {{ group.label }} ทั้งหมด ({{ group.count }})
         </li>
 
         <li

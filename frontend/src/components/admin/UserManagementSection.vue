@@ -23,7 +23,7 @@
             <th>ID</th>
             <th>ชื่อ</th>
             <th>อีเมล</th>
-            <th>Role</th>
+            <th>บทบาท</th>
             <th>จัดการ</th>
           </tr>
         </thead>
@@ -38,8 +38,8 @@
             </td>
             <td>
               <select v-model="userDrafts[user.id].role" class="form-select form-select-sm" :disabled="user.id === currentUserId">
-                <option value="customer">customer</option>
-                <option value="admin">admin</option>
+                <option value="customer">ลูกค้า</option>
+                <option value="admin">ผู้ดูแลระบบ</option>
               </select>
             </td>
             <td class="actions">

@@ -23,7 +23,7 @@
         </div>
 
         <div class="bundle-box" v-if="bundleCandidates.length > 0">
-          <h2>Smart Bundle</h2>
+          <h2>ชุดแนะนำอัจฉริยะ</h2>
           <p>
             จับคู่กับ {{ bundleCandidates.length }} ชิ้นแนะนำ เพิ่มลงตะกร้าครั้งเดียวได้ทันที
           </p>

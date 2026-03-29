@@ -4,9 +4,9 @@
       <div class="hero-copy">
         <p class="hero-tag">
           <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>
-          ดนตรีดีลแรงสไตล์มาร์เก็ตเพลส
+          ดีลเด่น
         </p>
-        <h1>MusicStore Marketplace</h1>
+        <h1>มาร์เก็ตเพลสเครื่องดนตรี MusicStore</h1>
         <p class="hero-desc">
           เครื่องดนตรีและอุปกรณ์เสริมสำหรับทุกระดับ ตั้งแต่มือใหม่ถึงมืออาชีพ พร้อมดีลใหม่ทุกสัปดาห์
         </p>
@@ -122,7 +122,7 @@
       <header class="section-head">
         <h2>
           <i class="bi bi-heart-fill" aria-hidden="true"></i>
-          Wishlist ของคุณ
+          รายการโปรดของคุณ
         </h2>
       </header>
 

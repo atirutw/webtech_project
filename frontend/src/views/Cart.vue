@@ -126,7 +126,7 @@ const handleCheckout = async () => {
   const order = await cartStore.checkout()
 
   if (order) {
-    checkoutSuccessMessage.value = `ชำระเงินสำเร็จ ออเดอร์ #${order.id}`
+    checkoutSuccessMessage.value = `ชำระเงินสำเร็จ คำสั่งซื้อ #${order.id}`
   }
 
   isCheckingOut.value = false

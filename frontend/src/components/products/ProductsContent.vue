@@ -49,7 +49,7 @@
     </p>
 
     <div class="pagination" v-if="totalPages > 1">
-      <button :disabled="currentPage === 1" @click="$emit('changePage', currentPage - 1)" aria-label="Previous page">
+      <button :disabled="currentPage === 1" @click="$emit('changePage', currentPage - 1)" aria-label="หน้าก่อนหน้า">
         <i class="bi bi-chevron-left" aria-hidden="true"></i>
       </button>
 
@@ -61,7 +61,7 @@
         {{ page }}
       </button>
 
-      <button :disabled="currentPage === totalPages" @click="$emit('changePage', currentPage + 1)" aria-label="Next page">
+      <button :disabled="currentPage === totalPages" @click="$emit('changePage', currentPage + 1)" aria-label="หน้าถัดไป">
         <i class="bi bi-chevron-right" aria-hidden="true"></i>
       </button>
     </div>

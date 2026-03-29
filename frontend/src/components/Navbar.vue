@@ -31,7 +31,7 @@
           <li v-if="auth.user?.role === 'admin'">
             <router-link to="/admin" class="nav-pill" :class="{ active: isAdminRoute }">
               <i class="bi bi-shield-lock" aria-hidden="true"></i>
-              Admin
+              แอดมิน
             </router-link>
           </li>
         </ul>
@@ -48,12 +48,12 @@
               <span class="avatar-badge">{{ userInitials }}</span>
               <span class="profile-name">{{ auth.user?.name }}</span>
             </router-link>
-            <button class="btn signout-btn" @click="handleLogout">Logout</button>
+            <button class="btn signout-btn" @click="handleLogout">ออกจากระบบ</button>
           </template>
 
           <template v-else>
-            <router-link to="/login" class="btn ghost-btn">Login</router-link>
-            <router-link to="/register" class="btn market-btn-primary register-btn">Register</router-link>
+            <router-link to="/login" class="btn ghost-btn">เข้าสู่ระบบ</router-link>
+            <router-link to="/register" class="btn market-btn-primary register-btn">สมัครสมาชิก</router-link>
           </template>
         </div>
 
@@ -63,7 +63,7 @@
           data-bs-toggle="offcanvas"
           data-bs-target="#mainNavbar"
           aria-controls="mainNavbar"
-          aria-label="Toggle navigation"
+          aria-label="เปิดเมนูนำทาง"
         >
           <i class="bi bi-list" aria-hidden="true"></i>
         </button>
@@ -72,7 +72,7 @@
       <div class="offcanvas offcanvas-end menu-drawer" tabindex="-1" id="mainNavbar" aria-labelledby="mainNavbarLabel">
         <div class="offcanvas-header">
           <h5 class="offcanvas-title" id="mainNavbarLabel">เมนู</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="ปิด"></button>
         </div>
 
         <div class="offcanvas-body">
@@ -98,7 +98,7 @@
             <li v-if="auth.user?.role === 'admin'">
               <router-link to="/admin" class="mobile-link" :class="{ active: isAdminRoute }" data-bs-dismiss="offcanvas">
                 <i class="bi bi-shield-lock" aria-hidden="true"></i>
-                Admin
+                แอดมิน
               </router-link>
             </li>
             <li>
@@ -113,12 +113,12 @@
           <div class="mobile-actions">
             <template v-if="auth.isAuthenticated">
               <router-link to="/profile" class="btn ghost-btn w-100" data-bs-dismiss="offcanvas">{{ auth.user?.name }}</router-link>
-              <button class="btn signout-btn w-100" @click="handleLogout" data-bs-dismiss="offcanvas">Logout</button>
+              <button class="btn signout-btn w-100" @click="handleLogout" data-bs-dismiss="offcanvas">ออกจากระบบ</button>
             </template>
 
             <template v-else>
-              <router-link to="/login" class="btn ghost-btn w-100" data-bs-dismiss="offcanvas">Login</router-link>
-              <router-link to="/register" class="btn market-btn-primary w-100" data-bs-dismiss="offcanvas">Register</router-link>
+              <router-link to="/login" class="btn ghost-btn w-100" data-bs-dismiss="offcanvas">เข้าสู่ระบบ</router-link>
+              <router-link to="/register" class="btn market-btn-primary w-100" data-bs-dismiss="offcanvas">สมัครสมาชิก</router-link>
             </template>
           </div>
         </div>

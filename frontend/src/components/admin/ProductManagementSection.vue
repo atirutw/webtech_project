@@ -16,8 +16,8 @@
         class="form-select toolbar-select"
         @change="$emit('updateProductTypeFilter', $event.target.value)">
         <option value="all">ทุกประเภท</option>
-        <option value="instrument">instrument</option>
-        <option value="accessory">accessory</option>
+        <option value="instrument">เครื่องดนตรี</option>
+        <option value="accessory">อุปกรณ์เสริม</option>
       </select>
     </div>
 
@@ -34,14 +34,14 @@
 
       <div class="field">
         <label>หมวดหมู่</label>
-        <input v-model="productForm.category" class="form-control" type="text" placeholder="เช่น guitar" />
+        <input v-model="productForm.category" class="form-control" type="text" placeholder="เช่น กีตาร์" />
       </div>
 
       <div class="field">
         <label>ประเภทสินค้า</label>
         <select v-model="productForm.type" class="form-select">
-          <option value="instrument">instrument</option>
-          <option value="accessory">accessory</option>
+          <option value="instrument">เครื่องดนตรี</option>
+          <option value="accessory">อุปกรณ์เสริม</option>
         </select>
       </div>
 
@@ -87,7 +87,7 @@
             <td>{{ item.name }}</td>
             <td>
               <span class="badge" :class="item.type === 'instrument' ? 'text-bg-primary' : 'text-bg-info'">
-                {{ item.type }}
+                {{ item.type === 'instrument' ? 'เครื่องดนตรี' : 'อุปกรณ์เสริม' }}
               </span>
             </td>
             <td>{{ item.price }}</td>

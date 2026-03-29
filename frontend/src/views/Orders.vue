@@ -21,7 +21,7 @@
       <div v-else-if="!isLoading && !errorMessage" class="list-wrap">
         <article v-for="order in orders" :key="order.id" class="order-row">
           <div>
-            <p class="order-id">ออเดอร์ #{{ order.id }}</p>
+            <p class="order-id">คำสั่งซื้อ #{{ order.id }}</p>
             <p class="order-meta">
               {{ formatDate(order.createdAt) }} · {{ order.itemCount }} รายการ
             </p>
@@ -98,7 +98,7 @@ const reorder = async (orderId) => {
   const payload = await cartStore.reorder(orderId)
 
   if (payload) {
-    reorderMessage.value = `สั่งซ้ำจากออเดอร์ #${orderId} สำเร็จ`
+    reorderMessage.value = `สั่งซ้ำจากคำสั่งซื้อ #${orderId} สำเร็จ`
     router.push('/cart')
   }
 }

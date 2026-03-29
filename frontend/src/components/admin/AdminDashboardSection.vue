@@ -1,7 +1,7 @@
 <template>
   <section class="section">
     <div class="section-head">
-      <h2 class="h5 mb-0">Command Center</h2>
+      <h2 class="h5 mb-0">ศูนย์ควบคุม</h2>
     </div>
 
     <div class="kpi-grid">
@@ -10,11 +10,11 @@
         <p class="kpi-value">{{ dashboard.kpis.totalRevenue.toLocaleString() }} ฿</p>
       </article>
       <article class="kpi-card">
-        <p class="kpi-label">จำนวนออเดอร์</p>
+        <p class="kpi-label">จำนวนคำสั่งซื้อ</p>
         <p class="kpi-value">{{ dashboard.kpis.ordersCount.toLocaleString() }}</p>
       </article>
       <article class="kpi-card">
-        <p class="kpi-label">ค่าเฉลี่ยต่อออเดอร์</p>
+        <p class="kpi-label">มูลค่าเฉลี่ยต่อคำสั่งซื้อ</p>
         <p class="kpi-value">{{ dashboard.kpis.averageOrderValue.toLocaleString() }} ฿</p>
       </article>
       <article class="kpi-card">
@@ -22,7 +22,7 @@
         <p class="kpi-value">{{ dashboard.kpis.customersCount.toLocaleString() }}</p>
       </article>
       <article class="kpi-card">
-        <p class="kpi-label">รถเข็นค้างอยู่</p>
+        <p class="kpi-label">ตะกร้าที่ยังไม่ยืนยัน</p>
         <p class="kpi-value">{{ dashboard.kpis.openCarts.toLocaleString() }}</p>
       </article>
       <article class="kpi-card">
@@ -53,7 +53,7 @@
       </article>
 
       <article class="analytics-card">
-        <h3>ออเดอร์ล่าสุด</h3>
+        <h3>คำสั่งซื้อล่าสุด</h3>
         <ul class="mini-list">
           <li v-for="order in dashboard.recentOrders" :key="order.id">
             <span>#{{ order.id }} {{ order.customerName }}</span>

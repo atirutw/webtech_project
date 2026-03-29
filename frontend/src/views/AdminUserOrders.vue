@@ -19,7 +19,7 @@
       <div v-else-if="!isLoading && !errorMessage" class="list-wrap">
         <article v-for="order in orders" :key="order.id" class="order-row">
           <div>
-            <p class="order-id">ออเดอร์ #{{ order.id }}</p>
+            <p class="order-id">คำสั่งซื้อ #{{ order.id }}</p>
             <p class="order-meta">{{ formatDate(order.createdAt) }} · {{ order.itemCount }} รายการ</p>
           </div>
 

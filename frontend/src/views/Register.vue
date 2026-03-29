@@ -5,9 +5,9 @@
     <div class="register-card card border-0 shadow-lg p-4 p-md-5">
       <h1 class="text-warning mb-2">
         <i class="bi bi-person-plus-fill me-2" aria-hidden="true"></i>
-        Create Account
+        สร้างบัญชีผู้ใช้
       </h1>
-      <p class="subtitle mb-4">Join our Music World</p>
+      <p class="subtitle mb-4">สมัครสมาชิกเพื่อเริ่มใช้งาน MusicStore</p>
 
       <form @submit.prevent="handleRegister" class="d-grid gap-3">
         <div class="form-floating">
@@ -16,10 +16,10 @@
             type="text"
             class="form-control form-control-lg market-auth-input"
             id="name"
-            placeholder="Full Name"
+            placeholder="ชื่อ-นามสกุล"
             required
           />
-          <label for="name">Full Name</label>
+          <label for="name">ชื่อ-นามสกุล</label>
         </div>
 
         <div class="form-floating">
@@ -28,10 +28,10 @@
             type="email"
             class="form-control form-control-lg market-auth-input"
             id="email"
-            placeholder="Email"
+            placeholder="อีเมล"
             required
           />
-          <label for="email">Email</label>
+          <label for="email">อีเมล</label>
         </div>
 
         <div class="form-floating">
@@ -40,10 +40,10 @@
             type="password"
             class="form-control form-control-lg market-auth-input"
             id="password"
-            placeholder="Password"
+            placeholder="รหัสผ่าน"
             required
           />
-          <label for="password">Password</label>
+          <label for="password">รหัสผ่าน</label>
         </div>
 
         <div class="form-floating">
@@ -52,14 +52,14 @@
             type="password"
             class="form-control form-control-lg market-auth-input"
             id="adminKey"
-            placeholder="Admin Key (optional)"
+            placeholder="คีย์แอดมิน (ไม่บังคับ)"
           />
-          <label for="adminKey">Admin Key (optional)</label>
+          <label for="adminKey">คีย์แอดมิน (ไม่บังคับ)</label>
         </div>
 
         <button type="submit" class="btn btn-warning btn-lg fw-semibold" :disabled="isSubmitting">
           <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          {{ isSubmitting ? 'Registering...' : 'Register' }}
+          {{ isSubmitting ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก' }}
         </button>
       </form>
 
@@ -68,8 +68,8 @@
       </div>
 
       <p class="login-link mt-4 mb-0">
-        Already have an account?
-        <router-link to="/login" class="text-warning">Login</router-link>
+        มีบัญชีอยู่แล้ว?
+        <router-link to="/login" class="text-warning">เข้าสู่ระบบ</router-link>
       </p>
     </div>
   </div>
@@ -108,7 +108,7 @@ const handleRegister = async () => {
 
     router.push("/")
   } catch (error) {
-    errorMessage.value = error?.response?.data?.message || "Register failed"
+    errorMessage.value = error?.response?.data?.message || 'สมัครสมาชิกไม่สำเร็จ'
   } finally {
     isSubmitting.value = false
   }

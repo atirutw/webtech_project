@@ -1,14 +1,14 @@
 <template>
   <aside class="admin-sidebar">
-    <h1 class="h4 mb-2">Admin Panel</h1>
+    <h1 class="h4 mb-2">แผงควบคุมผู้ดูแลระบบ</h1>
     <p class="sidebar-subtitle">เลือกหมวดการจัดการ</p>
 
-    <div class="sidebar-nav" role="tablist" aria-label="Admin categories">
+    <div class="sidebar-nav" role="tablist" aria-label="หมวดการจัดการสำหรับผู้ดูแลระบบ">
       <button
         class="sidebar-item"
         :class="{ active: activeSection === 'dashboard' }"
         @click="$emit('changeSection', 'dashboard')">
-        <span class="sidebar-item-title">Command Center</span>
+        <span class="sidebar-item-title">ศูนย์ควบคุม</span>
         <span class="sidebar-item-meta">ภาพรวมธุรกิจ</span>
       </button>
 

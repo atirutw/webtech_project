@@ -1,5 +1,6 @@
 import cors from 'cors'
 import express from 'express'
+import path from 'node:path'
 
 import { adminRouter } from './routes/admin.routes'
 import { cartRouter } from './routes/cart.routes'
@@ -14,6 +15,7 @@ export const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.use('/media', express.static(path.resolve(process.cwd(), 'media')))
 
 app.use('/docs', docsRouter)
 app.use('/health', healthRouter)

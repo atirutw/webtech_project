@@ -38,8 +38,17 @@
         </div>
 
         <div class="field wide">
-          <label>URL รูปภาพ</label>
-          <input v-model="editForm.image" class="form-control" type="text" />
+          <label>รูปภาพสินค้า (อัปโหลดเข้าเซิร์ฟเวอร์)</label>
+          <div class="d-flex gap-2 align-items-center">
+            <input
+              class="form-control"
+              type="file"
+              accept="image/*"
+              :disabled="isUploadingImage || isSavingEdit"
+              @change="$emit('uploadImage', $event.target.files?.[0] || null)" />
+            <span v-if="isUploadingImage" class="small text-secondary">กำลังอัปโหลด...</span>
+          </div>
+          <small v-if="editForm.image" class="text-success mt-1">อัปโหลดแล้ว: {{ editForm.image }}</small>
         </div>
       </div>
 
@@ -67,8 +76,12 @@ defineProps({
   isSavingEdit: {
     type: Boolean,
     required: true
+  },
+  isUploadingImage: {
+    type: Boolean,
+    required: true
   }
 })
 
-defineEmits(['close', 'save'])
+defineEmits(['close', 'save', 'uploadImage'])
 </script>

@@ -56,8 +56,17 @@
       </div>
 
       <div class="field wide">
-        <label>URL รูปภาพ</label>
-        <input v-model="productForm.image" class="form-control" type="text" placeholder="https://..." />
+        <label>รูปภาพสินค้า (อัปโหลดเข้าเซิร์ฟเวอร์)</label>
+        <div class="d-flex gap-2 align-items-center">
+          <input
+            class="form-control"
+            type="file"
+            accept="image/*"
+            :disabled="isUploadingImage || isSubmittingProduct"
+            @change="$emit('uploadProductImage', $event.target.files?.[0] || null)" />
+          <span v-if="isUploadingImage" class="small text-secondary">กำลังอัปโหลด...</span>
+        </div>
+        <small v-if="productForm.image" class="text-success mt-1">อัปโหลดแล้ว: {{ productForm.image }}</small>
       </div>
     </div>
 
@@ -124,6 +133,10 @@ defineProps({
     type: Boolean,
     required: true
   },
+  isUploadingImage: {
+    type: Boolean,
+    required: true
+  },
   productMessage: {
     type: String,
     default: ''
@@ -137,6 +150,7 @@ defineProps({
 defineEmits([
   'updateProductSearch',
   'updateProductTypeFilter',
+  'uploadProductImage',
   'createProduct',
   'openEditProduct',
   'requestDeleteProduct'

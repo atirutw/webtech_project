@@ -12,7 +12,7 @@ This page contains endpoint purpose, parameters, return payload, and example usa
 ## Implemented Core Features
 
 - Product listing + product detail
-- Admin product management (add/edit/delete + image URL)
+- Admin product management (add/edit/delete + image upload to backend media storage)
 - Register/login/profile edit
 - Cart management + checkout (authenticated users)
 - Member order history + order detail

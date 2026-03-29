@@ -87,7 +87,16 @@ const html = `<!DOCTYPE html>
       <p><span class="method">POST</span> <code>/products</code> (Admin)</p>
       <p>Create product.</p>
       <p>Parameters: <code>name</code>, <code>brand</code>, <code>category</code>, <code>type</code>, <code>price</code>, <code>image</code>, <code>stock</code></p>
+      <p>For <code>image</code>, send an uploaded backend media path from <code>/products/media</code> (for example <code>/media/products/123.jpg</code>).</p>
+      <p>External image URLs are deprecated and rejected.</p>
       <p>Returns: <code>{ item }</code></p>
+    </div>
+
+    <div class="card">
+      <p><span class="method">POST</span> <code>/products/media</code> (Admin)</p>
+      <p>Upload product image to backend storage.</p>
+      <p>Parameters: header <code>Authorization</code>, form-data <code>file</code> (image)</p>
+      <p>Returns: <code>{ path, url, mimeType, size }</code></p>
     </div>
 
     <div class="card">
@@ -201,5 +210,5 @@ const html = `<!DOCTYPE html>
 export const docsRouter = Router()
 
 docsRouter.get('/', (_req, res) => {
-    res.type('html').send(html)
+  res.type('html').send(html)
 })

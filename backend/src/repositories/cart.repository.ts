@@ -1,4 +1,5 @@
 import { pool } from '../db/pool'
+import { resolveMediaUrl } from '../utils/media'
 
 type CartRow = {
     cart_item_id: number
@@ -33,7 +34,7 @@ const toCartItem = (row: CartRow): CartItem => ({
     brand: row.product_brand ?? '',
     type: row.product_type,
     category: row.product_category,
-    image: row.product_image ?? '',
+    image: resolveMediaUrl(row.product_image),
     price: Number(row.product_price),
     stock: row.product_stock,
     qty: row.quantity,

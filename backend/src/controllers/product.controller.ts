@@ -11,6 +11,19 @@ import {
     getTrendingProducts,
     updateProductAsAdmin,
 } from '../services/product.service'
+import { normalizeStoredMediaPath, resolveMediaUrl } from '../utils/media'
+import { HttpError } from '../utils/http-error'
+
+const imagePathSchema = z
+    .string()
+    .trim()
+    .refine((value) => value.startsWith('/media/') || value.startsWith('media/'), {
+        message: 'Use uploaded image path from /products/media',
+    })
+    .transform((value) => normalizeStoredMediaPath(value))
+    .refine((value) => value.startsWith('/media/'), {
+        message: 'Use uploaded image path from /products/media',
+    })
 
 const listProductsQuerySchema = z.object({
     page: z.coerce.number().int().positive().optional(),
@@ -32,7 +45,7 @@ const productBodySchema = z.object({
     category: z.string().trim().min(1),
     type: z.string().trim().min(1).default('instrument'),
     price: z.coerce.number().nonnegative(),
-    image: z.string().trim().optional(),
+    image: imagePathSchema.optional(),
     stock: z.coerce.number().int().nonnegative().default(0),
 })
 
@@ -43,7 +56,7 @@ const updateProductBodySchema = z
         category: z.string().trim().min(1).optional(),
         type: z.string().trim().min(1).optional(),
         price: z.coerce.number().nonnegative().optional(),
-        image: z.string().trim().optional(),
+        image: imagePathSchema.optional(),
         stock: z.coerce.number().int().nonnegative().optional(),
     })
     .refine((payload) => Object.keys(payload).length > 0, {
@@ -109,6 +122,25 @@ export const createProductController: RequestHandler = async (req, res, next) =>
         const payload = await createProductAsAdmin(body)
 
         res.status(201).json({ item: payload })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const uploadProductMediaController: RequestHandler = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            throw new HttpError(400, 'Image file is required')
+        }
+
+        const mediaPath = `/media/products/${req.file.filename}`
+
+        res.status(201).json({
+            path: mediaPath,
+            url: resolveMediaUrl(mediaPath),
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+        })
     } catch (error) {
         next(error)
     }

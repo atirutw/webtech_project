@@ -27,10 +27,12 @@
           :product-type-filter="productTypeFilter"
           :product-form="productForm"
           :is-submitting-product="isSubmittingProduct"
+          :is-uploading-image="isUploadingCreateImage"
           :product-message="productMessage"
           :filtered-products="filteredProducts"
           @update-product-search="productSearch = $event"
           @update-product-type-filter="productTypeFilter = $event"
+          @upload-product-image="uploadProductImage($event, 'create')"
           @create-product="createProduct"
           @open-edit-product="openEditProduct"
           @request-delete-product="requestDeleteProduct" />
@@ -52,7 +54,9 @@
       :open="isEditModalOpen"
       :edit-form="editForm"
       :is-saving-edit="isSavingEdit"
+      :is-uploading-image="isUploadingEditImage"
       @close="closeEditModal"
+      @upload-image="uploadProductImage($event, 'edit')"
       @save="saveEditedProduct" />
 
     <DeleteConfirmModal
@@ -96,6 +100,8 @@ const dashboardError = ref('')
 
 const isSubmittingProduct = ref(false)
 const isSavingEdit = ref(false)
+const isUploadingCreateImage = ref(false)
+const isUploadingEditImage = ref(false)
 const isDeleting = ref(false)
 const productMessage = ref('')
 const userMessage = ref('')
@@ -137,6 +143,87 @@ const productForm = ref({
 const adminHeaders = () => ({
   headers: authStore.authHeaders()
 })
+
+const toMediaPath = (value) => {
+  const raw = String(value || '').trim()
+
+  if (!raw) {
+    return ''
+  }
+
+  if (raw.startsWith('/media/')) {
+    return raw
+  }
+
+  if (raw.startsWith('media/')) {
+    return `/${raw}`
+  }
+
+  try {
+    const parsed = new URL(raw)
+    if (parsed.pathname.startsWith('/media/')) {
+      return parsed.pathname
+    }
+  } catch {
+    if (raw.startsWith('/media/')) {
+      return raw
+    }
+
+    if (raw.startsWith('media/')) {
+      return `/${raw}`
+    }
+
+    return ''
+  }
+
+  return ''
+}
+
+const buildImagePatch = (value) => {
+  const path = toMediaPath(value)
+
+  if (!path) {
+    return {}
+  }
+
+  return { image: path }
+}
+
+const uploadProductImage = async (file, target = 'create') => {
+  if (!file) {
+    return
+  }
+
+  const isEditTarget = target === 'edit'
+  const loadingRef = isEditTarget ? isUploadingEditImage : isUploadingCreateImage
+
+  loadingRef.value = true
+  productMessage.value = ''
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await api.post('/products/media', formData, adminHeaders())
+    const mediaPath = response.data?.path || ''
+
+    if (!mediaPath) {
+      throw new Error('อัปโหลดรูปภาพไม่สำเร็จ')
+    }
+
+    if (isEditTarget) {
+      editForm.value.image = mediaPath
+    } else {
+      productForm.value.image = mediaPath
+    }
+
+    productMessage.value = 'อัปโหลดรูปภาพสำเร็จ'
+  } catch (error) {
+    productMessage.value = error?.response?.data?.message || 'อัปโหลดรูปภาพไม่สำเร็จ'
+  } finally {
+    loadingRef.value = false
+  }
+}
 
 const buildUserDrafts = (list) => {
   const drafts = {}
@@ -225,7 +312,10 @@ const createProduct = async () => {
   isSubmittingProduct.value = true
 
   try {
-    await api.post('/products', productForm.value, adminHeaders())
+    await api.post('/products', {
+      ...productForm.value,
+      ...buildImagePatch(productForm.value.image)
+    }, adminHeaders())
 
     productForm.value = {
       name: '',
@@ -255,7 +345,7 @@ const openEditProduct = (product) => {
     type: product.type,
     price: product.price,
     stock: product.stock,
-    image: product.image || ''
+    image: toMediaPath(product.image || '')
   }
 
   isEditModalOpen.value = true
@@ -279,7 +369,7 @@ const saveEditedProduct = async () => {
       price: Number(editForm.value.price),
       stock: Number(editForm.value.stock),
       brand: editForm.value.brand,
-      image: editForm.value.image
+      ...buildImagePatch(editForm.value.image)
     }, adminHeaders())
 
     productMessage.value = 'แก้ไขสินค้าสำเร็จ'

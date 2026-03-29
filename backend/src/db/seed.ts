@@ -31,27 +31,6 @@ const products = [
     { name: 'Roland SC-55', brand: 'Roland', category: 'sound-module', type: 'instrument', price: 999.00, stock: 5 }
 ]
 
-const imageOverrides: Record<string, string> = {
-    'Roland JUNO-60': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Roland_Juno-60_%286935222973%29.jpg/330px-Roland_Juno-60_%286935222973%29.jpg',
-    'Roland JUPITER-8': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Roland_Jupiter-8_Synth%2C_1983_%28white_bg%29.jpg/330px-Roland_Jupiter-8_Synth%2C_1983_%28white_bg%29.jpg',
-    'Sound Blaster AWE64': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/KL_Creative_Labs_Soundblaster_AWE64_Gold_CT4390.jpg/330px-KL_Creative_Labs_Soundblaster_AWE64_Gold_CT4390.jpg',
-    'Roland SC-55': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Roland_SCC-1.jpg/330px-Roland_SCC-1.jpg'
-}
-
-async function getWikipediaImageUrl(title: string): Promise<string> {
-    if (imageOverrides[title]) return imageOverrides[title]
-    try {
-        const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`)
-        const data: any = await response.json()
-        if (data && data.thumbnail && data.thumbnail.source) {
-            return data.thumbnail.source
-        }
-    } catch (e) {
-        console.error(`Failed to fetch image for ${title}`, e)
-    }
-    return ''
-}
-
 async function seed() {
     console.log('Seeding database...')
     const client = await pool.connect()
@@ -73,7 +52,7 @@ async function seed() {
         // Seed products
         console.log('Seeding products...')
         for (const prod of products) {
-            const imageUrl = await getWikipediaImageUrl(prod.name)
+            const imagePath = ''
 
             // Revert title mapping back to original product name to match schema if needed
             let originalName = prod.name.replace(prod.brand + ' ', '')
@@ -93,7 +72,7 @@ async function seed() {
             await client.query(
                 `UPDATE products SET image_url = $1, price = $2, stock = $3 
                  WHERE name = $4 AND COALESCE(brand, '') = COALESCE($5, '')`,
-                [imageUrl, prod.price, prod.stock, originalName, prod.brand]
+                [imagePath, prod.price, prod.stock, originalName, prod.brand]
             )
 
             await client.query(
@@ -104,9 +83,9 @@ async function seed() {
                      WHERE p.name = $1 AND COALESCE(p.brand, '') = COALESCE($2, '')
                        AND p.category = $3 AND p.type = $4
         )`,
-                [originalName, prod.brand, prod.category, prod.type, prod.price, imageUrl, prod.stock]
+                [originalName, prod.brand, prod.category, prod.type, prod.price, imagePath, prod.stock]
             )
-            console.log(`Processed ${originalName} with image ${imageUrl}`)
+            console.log(`Processed ${originalName}`)
         }
 
         await client.query('COMMIT')

@@ -1,4 +1,5 @@
 import { pool } from '../db/pool'
+import { resolveMediaUrl } from '../utils/media'
 
 type ProductRow = {
     id: number
@@ -42,7 +43,7 @@ const toProduct = (row: ProductRow): Product => ({
     category: row.category,
     type: row.type,
     price: Number(row.price),
-    image: row.image_url ?? '',
+    image: resolveMediaUrl(row.image_url),
     stock: row.stock,
     createdAt: row.created_at.toISOString(),
 })

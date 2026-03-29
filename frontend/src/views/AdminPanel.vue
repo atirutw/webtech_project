@@ -1,270 +1,65 @@
 <template>
   <div class="admin-page">
     <div class="panel">
-      <aside class="admin-sidebar">
-        <h1 class="h4 mb-2">Admin Panel</h1>
-        <p class="sidebar-subtitle">เลือกหมวดการจัดการ</p>
-
-        <div class="sidebar-nav" role="tablist" aria-label="Admin categories">
-          <button
-            class="sidebar-item"
-            :class="{ active: activeSection === 'products' }"
-            @click="activeSection = 'products'">
-            <span class="sidebar-item-title">จัดการสินค้า</span>
-            <span class="sidebar-item-meta">{{ products.length }} รายการ</span>
-          </button>
-
-          <button
-            class="sidebar-item"
-            :class="{ active: activeSection === 'users' }"
-            @click="activeSection = 'users'">
-            <span class="sidebar-item-title">จัดการผู้ใช้</span>
-            <span class="sidebar-item-meta">{{ users.length }} บัญชี</span>
-          </button>
-        </div>
-      </aside>
+      <AdminSidebar
+        :active-section="activeSection"
+        :product-count="products.length"
+        :user-count="users.length"
+        @change-section="activeSection = $event" />
 
       <main class="admin-content">
-        <section v-show="activeSection === 'products'" class="section">
-          <div class="section-head">
-            <h2 class="h5 mb-0">จัดการสินค้า</h2>
-          </div>
+        <ProductManagementSection
+          v-show="activeSection === 'products'"
+          :product-search="productSearch"
+          :product-type-filter="productTypeFilter"
+          :product-form="productForm"
+          :is-submitting-product="isSubmittingProduct"
+          :product-message="productMessage"
+          :filtered-products="filteredProducts"
+          @update-product-search="productSearch = $event"
+          @update-product-type-filter="productTypeFilter = $event"
+          @create-product="createProduct"
+          @open-edit-product="openEditProduct"
+          @request-delete-product="requestDeleteProduct" />
 
-          <div class="toolbar">
-            <input
-              v-model.trim="productSearch"
-              class="form-control"
-              type="text"
-              placeholder="ค้นหาสินค้า/แบรนด์/หมวดหมู่" />
-            <select v-model="productTypeFilter" class="form-select toolbar-select">
-              <option value="all">ทุกประเภท</option>
-              <option value="instrument">instrument</option>
-              <option value="accessory">accessory</option>
-            </select>
-          </div>
-
-          <div class="form-grid">
-            <div class="field">
-              <label>ชื่อสินค้า</label>
-              <input v-model="productForm.name" class="form-control" type="text" placeholder="เช่น Fender Stratocaster" />
-            </div>
-
-            <div class="field">
-              <label>แบรนด์</label>
-              <input v-model="productForm.brand" class="form-control" type="text" placeholder="เช่น Fender" />
-            </div>
-
-            <div class="field">
-              <label>หมวดหมู่</label>
-              <input v-model="productForm.category" class="form-control" type="text" placeholder="เช่น guitar" />
-            </div>
-
-            <div class="field">
-              <label>ประเภทสินค้า</label>
-              <select v-model="productForm.type" class="form-select">
-                <option value="instrument">instrument</option>
-                <option value="accessory">accessory</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>ราคา</label>
-              <input v-model.number="productForm.price" class="form-control" type="number" min="0" placeholder="เช่น 12900" />
-            </div>
-
-            <div class="field">
-              <label>สต็อก</label>
-              <input v-model.number="productForm.stock" class="form-control" type="number" min="0" placeholder="เช่น 20" />
-            </div>
-
-            <div class="field wide">
-              <label>URL รูปภาพ</label>
-              <input v-model="productForm.image" class="form-control" type="text" placeholder="https://..." />
-            </div>
-          </div>
-
-          <button class="btn btn-warning fw-semibold" :disabled="isSubmittingProduct" @click="createProduct">
-            <span v-if="isSubmittingProduct" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            {{ isSubmittingProduct ? 'กำลังบันทึก...' : 'เพิ่มสินค้า' }}
-          </button>
-          <div v-if="productMessage" class="alert mt-3 mb-0 py-2" :class="productMessage.includes('ไม่สำเร็จ') ? 'alert-danger' : 'alert-success'">
-            {{ productMessage }}
-          </div>
-
-          <div class="table-wrap">
-            <table class="table table-dark table-hover align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>สินค้า</th>
-                  <th>ประเภท</th>
-                  <th>ราคา</th>
-                  <th>สต็อก</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in filteredProducts" :key="item.id">
-                  <td>{{ item.id }}</td>
-                  <td>{{ item.name }}</td>
-                  <td>
-                    <span class="badge" :class="item.type === 'instrument' ? 'text-bg-primary' : 'text-bg-info'">
-                      {{ item.type }}
-                    </span>
-                  </td>
-                  <td>{{ item.price }}</td>
-                  <td>{{ item.stock }}</td>
-                  <td class="actions">
-                    <button class="btn btn-outline-warning btn-sm" @click="openEditProduct(item)">แก้ไข</button>
-                    <button class="btn btn-outline-danger btn-sm" @click="requestDeleteProduct(item)">ลบ</button>
-                  </td>
-                </tr>
-                <tr v-if="filteredProducts.length === 0">
-                  <td colspan="6" class="empty-row">ไม่พบสินค้าที่ตรงเงื่อนไข</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section v-show="activeSection === 'users'" class="section">
-          <div class="section-head">
-            <h2 class="h5 mb-0">จัดการผู้ใช้</h2>
-          </div>
-
-          <div class="toolbar">
-            <input
-              v-model.trim="userSearch"
-              class="form-control"
-              type="text"
-              placeholder="ค้นหาผู้ใช้ด้วยชื่อหรืออีเมล" />
-          </div>
-
-          <div v-if="userMessage" class="alert mb-3 py-2" :class="userMessage.includes('ไม่สำเร็จ') ? 'alert-danger' : 'alert-success'">
-            {{ userMessage }}
-          </div>
-          <div class="table-wrap">
-            <table class="table table-dark table-hover align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>ชื่อ</th>
-                  <th>อีเมล</th>
-                  <th>Role</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="user in filteredUsers" :key="user.id">
-                  <td>{{ user.id }}</td>
-                  <td>
-                    <input v-model="userDrafts[user.id].name" class="form-control form-control-sm" type="text" />
-                  </td>
-                  <td>
-                    <input v-model="userDrafts[user.id].email" class="form-control form-control-sm" type="email" />
-                  </td>
-                  <td>
-                    <select v-model="userDrafts[user.id].role" class="form-select form-select-sm" :disabled="user.id === authStore.user?.id">
-                      <option value="customer">customer</option>
-                      <option value="admin">admin</option>
-                    </select>
-                  </td>
-                  <td class="actions">
-                    <button class="btn btn-outline-success btn-sm" @click="saveUser(user.id)">บันทึก</button>
-                    <router-link :to="`/admin/users/${user.id}/orders`" class="btn btn-outline-info btn-sm">
-                      ประวัติการซื้อ
-                    </router-link>
-                    <button
-                      class="btn btn-outline-danger btn-sm"
-                      :disabled="user.id === authStore.user?.id"
-                      @click="requestDeleteUser(user)">
-                      ลบ
-                    </button>
-                  </td>
-                </tr>
-                <tr v-if="filteredUsers.length === 0">
-                  <td colspan="5" class="empty-row">ไม่พบผู้ใช้ที่ตรงเงื่อนไข</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <UserManagementSection
+          v-show="activeSection === 'users'"
+          :user-search="userSearch"
+          :user-message="userMessage"
+          :filtered-users="filteredUsers"
+          :user-drafts="userDrafts"
+          :current-user-id="authStore.user?.id || null"
+          @update-user-search="userSearch = $event"
+          @save-user="saveUser"
+          @request-delete-user="requestDeleteUser" />
       </main>
     </div>
 
-    <div v-if="isEditModalOpen" class="overlay" @click.self="closeEditModal">
-      <div class="modal-card">
-        <h3 class="h5 mb-3">แก้ไขสินค้า #{{ editForm.id }}</h3>
+    <EditProductModal
+      :open="isEditModalOpen"
+      :edit-form="editForm"
+      :is-saving-edit="isSavingEdit"
+      @close="closeEditModal"
+      @save="saveEditedProduct" />
 
-        <div class="form-grid modal-form-grid">
-          <div class="field">
-            <label>ชื่อสินค้า</label>
-            <input v-model="editForm.name" class="form-control" type="text" />
-          </div>
-
-          <div class="field">
-            <label>แบรนด์</label>
-            <input v-model="editForm.brand" class="form-control" type="text" />
-          </div>
-
-          <div class="field">
-            <label>หมวดหมู่</label>
-            <input v-model="editForm.category" class="form-control" type="text" />
-          </div>
-
-          <div class="field">
-            <label>ประเภทสินค้า</label>
-            <select v-model="editForm.type" class="form-select">
-              <option value="instrument">instrument</option>
-              <option value="accessory">accessory</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>ราคา</label>
-            <input v-model.number="editForm.price" class="form-control" type="number" min="0" />
-          </div>
-
-          <div class="field">
-            <label>สต็อก</label>
-            <input v-model.number="editForm.stock" class="form-control" type="number" min="0" />
-          </div>
-
-          <div class="field wide">
-            <label>URL รูปภาพ</label>
-            <input v-model="editForm.image" class="form-control" type="text" />
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn btn-light" :disabled="isSavingEdit" @click="closeEditModal">ยกเลิก</button>
-          <button class="btn btn-warning fw-semibold" :disabled="isSavingEdit" @click="saveEditedProduct">
-            <span v-if="isSavingEdit" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            {{ isSavingEdit ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="deleteDialog.open" class="overlay" @click.self="closeDeleteDialog">
-      <div class="modal-card confirm-card">
-        <h3 class="h5 mb-2">ยืนยันการลบ</h3>
-        <p class="confirm-text mb-3">{{ deleteDialog.message }}</p>
-        <div class="modal-actions">
-          <button class="btn btn-light" :disabled="isDeleting" @click="closeDeleteDialog">ยกเลิก</button>
-          <button class="btn btn-danger" :disabled="isDeleting" @click="confirmDelete">
-            <span v-if="isDeleting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            {{ isDeleting ? 'กำลังลบ...' : 'ยืนยันการลบ' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <DeleteConfirmModal
+      :open="deleteDialog.open"
+      :message="deleteDialog.message"
+      :is-deleting="isDeleting"
+      @close="closeDeleteDialog"
+      @confirm="confirmDelete" />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+import AdminSidebar from '../components/admin/AdminSidebar.vue'
+import DeleteConfirmModal from '../components/admin/DeleteConfirmModal.vue'
+import EditProductModal from '../components/admin/EditProductModal.vue'
+import ProductManagementSection from '../components/admin/ProductManagementSection.vue'
+import UserManagementSection from '../components/admin/UserManagementSection.vue'
 
 import { api } from '../lib/api'
 import { useAuthStore } from '../stores/auth'
@@ -542,7 +337,7 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
+<style>
 .admin-page {
   min-height: 100vh;
   padding: 90px 24px 24px;

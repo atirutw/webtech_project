@@ -1,106 +1,38 @@
 <template>
   <div class="products-page page-shell">
-    <aside class="sidebar">
-      <div class="sidebar-head">
-        <h3>หมวดหมู่</h3>
-      </div>
-      <ul>
-        <li :class="{ active: selectedFacet === 'all' }" @click="goAllProducts()">
-          ทั้งหมด ({{ catalogTotalCount }})
-        </li>
-      </ul>
+    <ProductsSidebar
+      :selected-facet="selectedFacet"
+      :catalog-total-count="catalogTotalCount"
+      :grouped-categories="groupedCategories"
+      @all-products="goAllProducts"
+      @type-selected="goType"
+      @category-selected="goCategory" />
 
-      <template v-for="group in groupedCategories" :key="group.type">
-        <div class="group-title">{{ group.label }} ({{ group.count }})</div>
-        <ul>
-          <li
-            :class="{ active: selectedFacet === `type:${group.type}` }"
-            @click="goType(group.type)"
-          >
-            {{ group.label }}ทั้งหมด ({{ group.count }})
-          </li>
-
-          <li
-            v-for="entry in group.items"
-            :key="entry.category"
-            :class="{ active: selectedFacet === `category:${entry.category}` }"
-            @click="goCategory(entry.category)"
-          >
-            {{ entry.displayName || entry.category }} ({{ entry.count }})
-          </li>
-        </ul>
-      </template>
-    </aside>
-
-    <section class="content">
-      <header class="content-head">
-        <h1>
-          <i :class="`bi ${pageIconClass}`" aria-hidden="true"></i>
-          {{ pageTitle }}
-        </h1>
-        <p>{{ totalItems }} รายการ</p>
-      </header>
-
-      <div class="top-bar">
-        <input
-          v-model="searchText"
-          type="text"
-          class="market-input search-input"
-          placeholder="ค้นหาสินค้า..."
-        />
-
-        <select v-model="sortOption" class="market-select">
-          <option value="default">เรียงตามปกติ</option>
-          <option value="lowToHigh">ราคาต่ำ → สูง</option>
-          <option value="highToLow">ราคาสูง → ต่ำ</option>
-        </select>
-      </div>
-
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-      <p v-if="isLoading" class="loading-message">กำลังโหลดสินค้า...</p>
-
-      <div class="grid" v-if="!isLoading && paginatedProducts.length > 0">
-        <article class="card" v-for="product in paginatedProducts" :key="product.id">
-          <img :src="product.image || fallbackImage" />
-          <div class="meta">
-            <h3>{{ product.name }}</h3>
-            <p class="brand">{{ product.brand }}</p>
-            <p class="price">{{ product.price.toLocaleString() }} บาท</p>
-
-            <button class="market-btn-primary cart-btn" @click="addToCart(product)">
-              เพิ่มลงตะกร้า
-            </button>
-            <router-link class="btn btn-outline-secondary btn-sm mt-2" :to="`/products/${product.id}`">
-              ดูรายละเอียด
-            </router-link>
-          </div>
-        </article>
-      </div>
-
-      <p v-if="!isLoading && paginatedProducts.length === 0" class="loading-message">
-        ไม่พบสินค้า
-      </p>
-
-      <div class="pagination" v-if="totalPages > 1">
-        <button :disabled="currentPage === 1" @click="currentPage--" aria-label="Previous page">
-          <i class="bi bi-chevron-left" aria-hidden="true"></i>
-        </button>
-
-        <button v-for="page in totalPages" :key="page" :class="{ activePage: currentPage === page }" @click="goToPage(page)">
-          {{ page }}
-        </button>
-
-        <button :disabled="currentPage === totalPages" @click="currentPage++" aria-label="Next page">
-          <i class="bi bi-chevron-right" aria-hidden="true"></i>
-        </button>
-      </div>
-    </section>
+    <ProductsContent
+      :page-icon-class="pageIconClass"
+      :page-title="pageTitle"
+      :total-items="totalItems"
+      :search-text="searchText"
+      :sort-option="sortOption"
+      :error-message="errorMessage"
+      :is-loading="isLoading"
+      :paginated-products="paginatedProducts"
+      :fallback-image="fallbackImage"
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @update-search-text="searchText = $event"
+      @update-sort-option="sortOption = $event"
+      @add-to-cart="addToCart"
+      @change-page="goToPage" />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import ProductsContent from '../components/products/ProductsContent.vue'
+import ProductsSidebar from '../components/products/ProductsSidebar.vue'
 
 import { api } from '../lib/api'
 import { useCartStore } from '../stores/cart'
@@ -295,7 +227,7 @@ const addToCart = (product) => {
 }
 </script>
 
-<style scoped>
+<style>
 .products-page {
   display: flex;
   gap: 22px;

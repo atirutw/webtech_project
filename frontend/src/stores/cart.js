@@ -272,6 +272,28 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
+    async clearCart() {
+      this.errorMessage = ''
+
+      if (!this.shouldUseServerCart()) {
+        this.items = []
+        localStorage.removeItem('cart')
+        this.broadcastCartSync('guest-updated')
+        return
+      }
+
+      try {
+        const response = await api.delete('/cart', {
+          headers: this.authHeaders()
+        })
+
+        this.items = this.mapServerItems(response.data.items || [])
+        this.broadcastCartSync('server-updated')
+      } catch (error) {
+        this.errorMessage = error?.response?.data?.message || 'ล้างตะกร้าไม่สำเร็จ'
+      }
+    },
+
     async checkout() {
       this.errorMessage = ''
       this.checkoutResult = null

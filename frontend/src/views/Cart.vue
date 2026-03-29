@@ -62,6 +62,16 @@
             <div class="card-body p-4">
               <h3 class="h5 mb-3">สรุปคำสั่งซื้อ</h3>
 
+              <button
+                v-if="items.length > 0"
+                class="btn btn-outline-danger w-100 fw-semibold mb-3"
+                :disabled="isClearingCart || isCheckingOut"
+                @click="handleClearCart"
+              >
+                <span v-if="isClearingCart" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ isClearingCart ? 'กำลังล้างตะกร้า...' : 'ล้างตะกร้าทั้งหมด' }}
+              </button>
+
               <div class="d-flex justify-content-between mb-2">
                 <span>รวมสินค้า</span>
                 <span>{{ totalPrice }} ฿</span>
@@ -111,13 +121,26 @@ import { useAuthStore } from "../stores/auth"
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const isCheckingOut = ref(false)
+const isClearingCart = ref(false)
 const checkoutSuccessMessage = ref("")
 
 const { items, totalPrice } = storeToRefs(cartStore)
 
 const { increase, decrease, removeFromCart } = cartStore
 
-const isCheckoutDisabled = computed(() => items.value.length === 0 || !authStore.isAuthenticated || isCheckingOut.value)
+const isCheckoutDisabled = computed(() =>
+  items.value.length === 0 ||
+  !authStore.isAuthenticated ||
+  isCheckingOut.value ||
+  isClearingCart.value,
+)
+
+const handleClearCart = async () => {
+  checkoutSuccessMessage.value = ""
+  isClearingCart.value = true
+  await cartStore.clearCart()
+  isClearingCart.value = false
+}
 
 const handleCheckout = async () => {
   checkoutSuccessMessage.value = ""

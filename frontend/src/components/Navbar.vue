@@ -170,6 +170,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
 const handleLogout = async () => {
   await auth.logout()
+  await cart.loadCart()
   router.push('/login')
 }
 </script>
